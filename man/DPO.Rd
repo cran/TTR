@@ -6,24 +6,22 @@
   by subtracting a moving average of the price from the price.
 }
 \usage{
-  DPO(x, n=10, maType, shift=n/2+1, percent=FALSE, \dots)
+  DPO(x, ma = list("SMA", n=10), shift = ma$n/2+1, percent = FALSE)
 }
 \arguments{
-  \item{x}{ Price, volume, etc. series that is coercible to xts or matrix. }
-  \item{n}{ Number of periods for moving average. }
-  \item{maType}{ A function or a string naming the function to be called. }
+  \item{x}{ Price, volume, etc. series to use. }
+  \item{ma}{ A \emph{list} whose first component is a string containing the moving average
+    function name; additional parameters may also be specified as \emph{named} components. }
   \item{shift}{ The number of periods to shift the moving average. }
   \item{percent}{ logical; if \code{TRUE}, the percentage difference between the slow and fast moving
     averages is returned, otherwise the difference between the respective averages is returned. }
-  \item{\dots}{ Other arguments to be passed to the \code{maType} function. }
 }
 \details{
   The Detrended Price shows cycles and overbought / oversold conditions. Note the calculation
   shifts the results \code{shift} periods, so the last \code{shift} periods will be zero.
 }
 \value{
-  A object of the same class as \code{x} or a vector (if \code{try.xts}
-  fails) containing the DPO values.
+  A vector containing the DPO values.
 }
 \author{ Josh Ulrich }
 \references{
@@ -36,11 +34,11 @@
 }
 \seealso{
   See \code{\link{EMA}}, \code{\link{SMA}}, etc. for moving average options; and note
-  Warning section.  See \code{\link{MACD}} for a general oscillator.
+  Warning section.  See \code{\link{oscillator}} for other oscillators.
 }
 \examples{
   data(ttrc)
-  priceDPO <- DPO(ttrc[,"Close"])
-  volumeDPO <- DPO(ttrc[,"Volume"])
+  price.dpo <- DPO(ttrc[,"Close"])
+  volume.dpo <- DPO(ttrc[,"Volume"])
 }
 \keyword{ ts }

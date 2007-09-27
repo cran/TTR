@@ -1,24 +1,5 @@
-#
-#   TTR: Technical Trading Rules
-#
-#   Copyright (C) 2007-2008  Joshua M. Ulrich
-#
-#   This program is free software: you can redistribute it and/or modify
-#   it under the terms of the GNU General Public License as published by
-#   the Free Software Foundation, either version 3 of the License, or
-#   (at your option) any later version.
-#
-#   This program is distributed in the hope that it will be useful,
-#   but WITHOUT ANY WARRANTY; without even the implied warranty of
-#   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-#   GNU General Public License for more details.
-#
-#   You should have received a copy of the GNU General Public License
-#   along with this program.  If not, see <http://www.gnu.org/licenses/>.
-#
-
 "CCI" <-
-function(HLC, n=20, maType, c=0.015, ...) {
+function(HLC, ma = list("SMA", n=20), c=0.015) {
 
   # Commodity Channel Index
 
@@ -27,31 +8,26 @@ function(HLC, n=20, maType, c=0.015, ...) {
   # http://www.linnsoft.com/tour/techind/cci.htm
   # http://stockcharts.com/education/IndicatorAnalysis/indic_CCI.html
 
-  HLC <- try.xts(HLC, error=as.matrix)
+  if(NCOL(HLC)==1) {
+    message("Using Close/univariate price series."); flush.console()
+    HLC <- as.vector(HLC)
+  } else
 
   if(NCOL(HLC)==3) {
-    if(is.xts(HLC)) {
-      xa <- xcoredata(HLC)
-      HLC <- xts(rowMeans(HLC),index(HLC))
-      xcoredata(HLC) <- xa
-    } else {
-      HLC <- rowMeans(HLC)
-    }
+    message("Using typical price series."); flush.console()
+    HLC <- rowMeans(HLC)
   } else
-  if(NCOL(HLC)!=1) {
-    stop("Price series must be either High-Low-Close, or Close/univariate.")
+
+  stop("Price series must be either High-Low-Close, or Close/univariate.")
+
+  mavg  <- do.call( ma[[1]], c( list(HLC), ma[-1] ) )
+  mean.dev <- rep(NA, NROW(HLC))
+
+  for(i in ma$n:NROW(HLC)) {
+    mean.dev[i] <- sum( abs( mavg[i] - HLC[(i-ma$n+1):i] ) ) / ma$n
   }
 
-  maArgs <- list(n=n, ...)
-  # Default MA
-  if(missing(maType)) {
-    maType <- 'SMA'
-  }
-  
-  mavg  <- do.call( maType, c( list(HLC), maArgs ) )
-  meanDev <- runMAD( HLC, n, center=mavg, stat="mean" )
+  cci <- ( HLC - mavg ) / ( c * mean.dev )
 
-  cci <- ( HLC - mavg ) / ( c * meanDev )
-
-  reclass(cci, HLC)
+  return( cci )
 }

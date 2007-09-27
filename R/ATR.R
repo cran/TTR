@@ -1,24 +1,5 @@
-#
-#   TTR: Technical Trading Rules
-#
-#   Copyright (C) 2007-2008  Joshua M. Ulrich
-#
-#   This program is free software: you can redistribute it and/or modify
-#   it under the terms of the GNU General Public License as published by
-#   the Free Software Foundation, either version 3 of the License, or
-#   (at your option) any later version.
-#
-#   This program is distributed in the hope that it will be useful,
-#   but WITHOUT ANY WARRANTY; without even the implied warranty of
-#   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-#   GNU General Public License for more details.
-#
-#   You should have received a copy of the GNU General Public License
-#   along with this program.  If not, see <http://www.gnu.org/licenses/>.
-#
-
 "ATR" <-
-function(HLC, n=14, maType, ...) {
+function(HLC, ma = list("EMA", n=14, wilder=TRUE)) {
 
   # Average True Range / True Range
 
@@ -28,30 +9,14 @@ function(HLC, n=14, maType, ...) {
   # http://www.linnsoft.com/tour/techind/trueRange.htm
   # http://stockcharts.com/education/IndicatorAnalysis/indic_ATR.html
 
-  HLC <- try.xts(HLC, error=as.matrix)
-  
-  if(is.xts(HLC)) {
-    closeLag <- lag(HLC[,3])
-  } else {
-    closeLag <- c( NA, HLC[-NROW(HLC),3] )
-  }
+  HLC <- as.matrix(HLC)
+  close.lag <- c( HLC[1,3], HLC[-nrow(HLC),3] )
 
-  trueHigh <- pmax( HLC[,1], closeLag, na.rm=FALSE )
-  trueLow  <- pmin( HLC[,2], closeLag, na.rm=FALSE )
-  tr       <- trueHigh - trueLow
+  true.high <- pmax( HLC[,1], close.lag )
+  true.low  <- pmin( HLC[,2], close.lag )
+  tr        <- true.high - true.low
 
-  maArgs <- list(n=n, ...)
-  
-  # Default Welles Wilder EMA
-  if(missing(maType)) {
-    maType <- 'EMA'
-    maArgs$wilder <- TRUE
-  }
+  atr <- do.call( ma[[1]], c( list(tr), ma[-1] ) )
 
-  atr <- do.call( maType, c( list(tr), maArgs ) )
-
-  # Convert back to original class
-  result <- cbind( tr, atr, trueHigh, trueLow )
-  colnames(result) <- c('tr','atr','trueHigh','trueLow')
-  reclass( result, HLC )
+  return( cbind( tr, atr, true.high, true.low ) )
 }

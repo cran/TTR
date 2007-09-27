@@ -6,21 +6,19 @@
   Developed by Marc Chaikin.
 }
 \usage{
-  chaikinVolatility(HL, n=10, maType, \dots)
+  chaikinVolatility(HL, ma = list("EMA", n=10))
 }
 \arguments{
-  \item{HL}{ Object that is coercible to xts or matrix and contains High-Low prices. }
-  \item{n}{ Number of periods for moving average. }
-  \item{maType}{ A function or a string naming the function to be called. }
-  \item{\dots}{ Other arguments to be passed to the \code{maType} function. }
+  \item{HL}{ Object able to be coerced to a matrix, which contains High-Low prices. }
+  \item{ma}{ A \emph{list} whose first component is a string containing the moving average
+    function name; additional parameters may also be specified as \emph{named} components. }
 }
 \details{
   The Chaikin Volatility indicator defines volatility as an increase in the difference
   between the high and low.
 }
 \value{
-  A object of the same class as \code{HL} or a vector (if \code{try.xts}
-  fails) containing the Chaikin Volatility values.
+  A vector containing the Chaikin Volatility values.
 }
 \author{ Josh Ulrich }
 \references{

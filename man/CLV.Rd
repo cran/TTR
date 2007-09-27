@@ -8,15 +8,14 @@
   CLV(HLC)
 }
 \arguments{
-  \item{HLC}{ Object that is coercible to xts or matrix and contains High-Low-Close prices. }
+  \item{HLC}{ Object able to be coerced to a matrix, which contains High-Low-Close prices. }
 }
 \details{
   The CLV will fall in a range of -1 to +1.  If the CLV is +/-1, the close is at the high/low;
   if the CLV is 0, the close is directly between the high and low.
 }
 \value{
-  A object of the same class as \code{HLC} or a vector (if \code{try.xts}
-  fails) containing the Close Location Values of a High-Low-Close price series.
+  A vector containg the Close Location Values of a High-Low-Close price series.
 }
 \author{ Josh Ulrich }
 \references{

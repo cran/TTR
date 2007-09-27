@@ -6,10 +6,10 @@
   Developed by Adam White.
 }
 \usage{
-  VHF(price, n=28)
+  VHF(price, n = 28)
 }
 \arguments{
-  \item{price}{ Object that is coercible to xts or matrix and contains a Close price
+  \item{price}{ Object able to be coerced to a matrix, which contains either a Close price
     series, or a High-Low-Close price series. }
   \item{n}{ Number of periods to use. }
 }
@@ -19,8 +19,7 @@
   sum of the close price changes.
 }
 \value{
-  A object of the same class as \code{price} or a vector (if \code{try.xts}
-  fails) containing the VHF values.
+  A vector containing the VHF values.
 }
 \author{ Josh Ulrich }
 \references{

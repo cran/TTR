@@ -6,15 +6,14 @@
   The Commodity Channel Index (CCI) attempts to identify starting and ending trends.
 }
 \usage{
-  CCI(HLC, n=20, maType, c=0.015, \dots)
+  CCI(HLC, ma = list("SMA", n=20), c=0.015)
 }
 \arguments{
-  \item{HLC}{ Object that is coercible to xts or matrix and contains High-Low-Close prices.
-   If only a univariate series is given, it will be used.  See details. }
-  \item{n}{ Number of periods for moving average. }
-  \item{maType}{ A function or a string naming the function to be called. }
-  \item{c}{ Constant to apply to the mean deviation. }
-  \item{\dots}{ Other arguments to be passed to the \code{maType} function. }
+  \item{HLC}{ High-Low-Close price series to use.  If only a univariate series is given,
+    it will be used.  See details. }
+  \item{ma}{ A \emph{list} whose first component is a string containing the moving average
+    function name; additional parameters may also be specified as \emph{named} components. }
+  \item{c}{ Constant to apply to the mean deviation. } 
 }
 \details{
   CCI relates the current price and the average of price over \code{n} periods. The CCI
@@ -26,8 +25,7 @@
   (e.g. Close, Weighted Close, Median Price, etc.) is provided, it will be used instead.
 }
 \value{
-  A object of the same class as \code{HLC} or a vector (if \code{try.xts}
-  fails) containing the CCI values.
+  A vector containing the CCI values.
 }
 \author{ Josh Ulrich }
 \references{

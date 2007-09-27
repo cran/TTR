@@ -1,22 +1,3 @@
-#
-#   TTR: Technical Trading Rules
-#
-#   Copyright (C) 2007-2008  Joshua M. Ulrich
-#
-#   This program is free software: you can redistribute it and/or modify
-#   it under the terms of the GNU General Public License as published by
-#   the Free Software Foundation, either version 3 of the License, or
-#   (at your option) any later version.
-#
-#   This program is distributed in the hope that it will be useful,
-#   but WITHOUT ANY WARRANTY; without even the implied warranty of
-#   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-#   GNU General Public License for more details.
-#
-#   You should have received a copy of the GNU General Public License
-#   along with this program.  If not, see <http://www.gnu.org/licenses/>.
-#
-
 "VHF" <-
 function(price, n=28) {
 
@@ -25,10 +6,11 @@ function(price, n=28) {
   # http://www.fmlabs.com/reference/VHF.htm
   # http://www.equis.com/Customer/Resources/TAAZ?c=3&p=119
 
-  price <- try.xts(price, error=as.matrix)
+  price <- as.matrix(price)
 
   # Calculation if price series is given
   if(NCOL(price)==1) {
+    message("Using Close price series"); flush.console()
     high  <- price
     low   <- price
     close <- price
@@ -36,6 +18,7 @@ function(price, n=28) {
 
   # Calculation if HLC series is given
   if(NCOL(price)==3) {
+    message("Using High-Low-Close series"); flush.console()
     high  <- price[,1]
     low   <- price[,2]
     close <- price[,3]
@@ -44,11 +27,12 @@ function(price, n=28) {
   stop("Price series must be either Close, or High-Low-Close")
 
   # Find highest max, and lowest min of price series
-  hmax  <- runMax( high, n)
-  lmin  <- runMin(  low, n)
-  denom <- momentum(close, n=1, na.pad=TRUE)
+  hmax  <- rollFUN( high, n, FUN="max")
+  lmin  <- rollFUN(  low, n, FUN="min")
+  denom <- momentum(close, n=1, na=0)
 
-  VHF <- ( hmax - lmin ) / runSum(denom, n)
+  VHF <- ( hmax - lmin ) / rollFUN(denom, n, FUN="sum")
 
-  reclass(VHF, price)
+  return( VHF )
+
 }

@@ -11,7 +11,7 @@
   aroon(HL, n=20)
 }
 \arguments{
-  \item{HL}{ Object that is coercible to xts or matrix and contains either a High-Low price
+  \item{HL}{ Object able to be coerced to a matrix, which contains either a High-Low price
     series, or a Close price series. }
   \item{n}{ Number of periods to use in the calculation. }
 }
@@ -22,11 +22,10 @@
   Aroon up (down) to decrease by (1 / \code{n}) x 100.
 }
 \value{
-  A object of the same class as \code{HL} or a matrix (if \code{try.xts}
-  fails) containing the columns:
-  \item{ aroonUp }{ The Aroon up indicator. }
-  \item{ aroonDn }{ The Aroon down indicator. }
-  \item{ oscillator }{ The Aroon oscillator (\code{aroonUp - aroonDn}). }
+  A matrix containing the columns:
+  \item{ aroon.up }{ The Aroon up indicator. }
+  \item{ aroon.dn }{ The Aroon down indicator. }
+  \item{ oscillator }{ The Aroon oscillator (\code{aroon.up - aroon.dn}). }
 }
 \author{ Josh Ulrich }
 \references{
@@ -40,8 +39,8 @@
   If High-Low prices are given, the function calculates the max/min using the high/low prices.
   Otherwise the function calculates the max/min of the single series.
 
-  Up (down) trends are indicated when the aroonUp(Dn) is between 70 and 100.  Strong trends
-  are indicated when when the aroonUp(Dn) is above 70 while the aroonDn(Up) is below 30.
+  Up (down) trends are indicated when the aroon.up(dn) is between 70 and 100.  Strong trends
+  are indicated when when the aroon.up(dn) is above 70 while the aroon.dn(up) is below 30.
   Also, crossovers may be useful.
 }
 \seealso{

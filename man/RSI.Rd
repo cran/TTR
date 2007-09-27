@@ -1,29 +1,27 @@
 \name{RSI}
 \alias{RSI}
-\title{ Relative Strength Index }
+\title{ Relitive Strength Index }
 \description{
   The Relative Strength Index (RSI) calculates a ratio of the recent upward price
   movements to the absolute price movement.  Developed by J. Welles Wilder.
 }
 \usage{
-  RSI(price, n=14, maType, \dots)
+  RSI(price, ma.up=list("EMA", n=14, wilder=TRUE), ma.down=ma.up)
 }
 \arguments{
-  \item{price}{ Price series that is coercible to xts or matrix. }
-  \item{n}{ Number of periods for moving averages. }
-  \item{maType}{ Either: \cr(1) A function or a string naming the function to be called, or\cr
-    (2) a \emph{list} with the first component like (1) above, and additional parameters
-    specified as \emph{named} components.  See Examples. }
-  \item{\dots}{ Other arguments to be passed to the \code{maType} function in case (1) above. }
+  \item{price}{ Price series to use. }
+  \item{ma.up}{ A \emph{list} whose first component is a string containing the upward price
+    movement moving average function name; additional parameters may also be specified
+    as \emph{named} components. }
+  \item{ma.down}{ Similar to \code{ma.up}, but for the downward price movement moving average. }
 }
 \details{
   The RSI calculation is \code{RSI = 100 - 100 / ( 1 + RS )}, where \code{RS} is the smoothed
-  ratio of 'average gains over 'average' losses.  The 'averages' aren't true
+  ratio of \sQuote{average} gains over \sQuote{average} losses.  The \sQuote{average} aren't true
   averages, since they're divided by the value of \code{n} not the number of gain/loss periods.
 }
 \value{
-  A object of the same class as \code{price} or a vector (if \code{try.xts}
-  fails) containing the RSI values.
+  A vector containing the RSI values.
 }
 \author{ Josh Ulrich }
 \references{
@@ -47,18 +45,6 @@
 }
 \examples{
   data(ttrc)
-  price <- ttrc[,"Close"]
-
-  # Default case
-  rsi <- RSI(price)
-
-  # Case of one 'maType' for both MAs
-  rsiMA1 <- RSI(price, n=14, maType="WMA", wts=ttrc[,"Volume"])
-
-  # Case of two different 'maType's for both MAs
-  rsiMA2 <- RSI(price, n=14, maType=list(maUp=list(EMA,ratio=1/5),
-                maDown=list(WMA,wts=1:10)))
-
+  rsi <- RSI(ttrc[,"Close"])
 }
 \keyword{ ts }
-
