@@ -1,5 +1,10 @@
+#-------------------------------------------------------------------------#
+# TTR, copyright (C) Joshua M. Ulrich, 2007                               #
+# Distributed under GNU GPL version 3                                     #
+#-------------------------------------------------------------------------#
+
 "DPO" <-
-function(x, ma=list("SMA", n=10), shift=ma$n/2+1, percent=FALSE) {
+function(x, n=10, maType="SMA", shift=n/2+1, percent=FALSE, ...) {
 
   # De-Trended Price Oscillator
 
@@ -8,16 +13,15 @@ function(x, ma=list("SMA", n=10), shift=ma$n/2+1, percent=FALSE) {
 
   x <- as.vector(x)
 
-  mavg <- do.call( ma[[1]], c( list(x), ma[-1] ) )
-  mavg <- c( mavg[-c(1:shift)], rep(0, shift) )
+  maArgs <- list(n=n, ...)
+  mavg <- do.call( maType, c( list(x), maArgs ) )
+  mavg <- c( mavg[-c(1:shift)], rep(NA, shift) )
 
   if(percent) {
     DPO <- 100 * ( x / mavg - 1 )
   } else {
     DPO <- x - mavg
   }
-
-  DPO[(NROW(DPO)-shift+1):NROW(DPO)] <- 0
 
   return( DPO )
 }
