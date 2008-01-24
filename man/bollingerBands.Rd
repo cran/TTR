@@ -1,25 +1,27 @@
 \name{bollingerBands}
 \alias{bollingerBands}
+\alias{BBands}
 \title{ Bollinger Bands }
 \description{
   Bollinger Bands are a way to compare a security's volatility and price levels over
   a period of time.  Developed by John Bollinger.
 }
 \usage{
-  bollingerBands(HLC, ma = list("SMA", n=20), sd = list(FUN="sd", n=2))
+  BBands(HLC, n=20, maType="SMA", sd=2, \dots)
 }
 \arguments{
   \item{HLC}{ High-Low-Close price series to use.  If only a univariate series is given,
     it will be used.  See details. }
-  \item{ma}{ A \emph{list} whose first component is a string containing the moving average
-    function name; additional parameters may also be specified as \emph{named} components. }
-  \item{sd}{ A \emph{list} of standard deviation input. }
+  \item{n}{ Number of periods for moving average. }
+  \item{maType}{ A function or a string naming the function to be called. }
+  \item{sd}{ The number of standard deviations to use. }
+  \item{\dots}{ Other arguments to be passed to the \code{maType} function. }
 }
 \details{
   Bollinger Bands consist of three lines:
 
   The middle band is generally a 20-period SMA of the typical price ([high + low + close]/3).
-  The upper and lower bands are \code{sd$n} standard deviations (generally 2) above and
+  The upper and lower bands are \code{sd} standard deviations (generally 2) above and
   below the MA.
 
   The middle band is usually calculated using the typical price, but if a univariate series
@@ -30,7 +32,7 @@
   \item{ dn }{ The lower Bollinger Band. }
   \item{ ma }{ The middle Moving Average (see notes). }
   \item{ up }{ The upper Bollinger Band. }
-  \item{ pct.b }{ The \%B calculation. }
+  \item{ pctB }{ The \%B calculation. }
 }
 \author{ Josh Ulrich }
 \references{
@@ -52,10 +54,11 @@
   Warning section.
 }
 \examples{
-  ## The examples below show the differences between using a High-Low-Close series, and
-  ## just a close series when calculating Bollinger Bands.
+  ## The examples below show the differences between using a
+  ## High-Low-Close series, and just a close series when
+  ## calculating Bollinger Bands.
   data(ttrc)
-  bbands.HLC   <- bollingerBands( ttrc[,c("High","Low","Close")] )
-  bbands.close <- bollingerBands( ttrc[,"Close"] )
+  bbands.HLC <- BBands( ttrc[,c("High","Low","Close")] )
+  bbands.close <- BBands( ttrc[,"Close"] )
 }
 \keyword{ ts }
