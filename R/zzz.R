@@ -1,3 +1,3 @@
-".First.lib" <- function(lib,pkg) {
-  library.dynam("TTR",pkg,lib)
+".onLoad" <- function(lib,pkg) {
+  cat("TTR: Technical Trading Rules (version 0.2)\n")
 }

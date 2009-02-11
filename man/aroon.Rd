@@ -11,7 +11,7 @@
   aroon(HL, n=20)
 }
 \arguments{
-  \item{HL}{ Object able to be coerced to a matrix, which contains either a High-Low price
+  \item{HL}{ Object that is coercible to xts or matrix and contains either a High-Low price
     series, or a Close price series. }
   \item{n}{ Number of periods to use in the calculation. }
 }
@@ -22,7 +22,8 @@
   Aroon up (down) to decrease by (1 / \code{n}) x 100.
 }
 \value{
-  A matrix containing the columns:
+  A object of the same class as \code{HL} or a matrix (if \code{try.xts}
+  fails) containing the columns:
   \item{ aroonUp }{ The Aroon up indicator. }
   \item{ aroonDn }{ The Aroon down indicator. }
   \item{ oscillator }{ The Aroon oscillator (\code{aroonUp - aroonDn}). }

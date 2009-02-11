@@ -1,7 +1,21 @@
-#-------------------------------------------------------------------------#
-# TTR, copyright (C) Joshua M. Ulrich, 2007                               #
-# Distributed under GNU GPL version 3                                     #
-#-------------------------------------------------------------------------#
+#
+#   TTR: Technical Trading Rules
+#
+#   Copyright (C) 2007-2008  Joshua M. Ulrich
+#
+#   This program is free software: you can redistribute it and/or modify
+#   it under the terms of the GNU General Public License as published by
+#   the Free Software Foundation, either version 3 of the License, or
+#   (at your option) any later version.
+#
+#   This program is distributed in the hope that it will be useful,
+#   but WITHOUT ANY WARRANTY; without even the implied warranty of
+#   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#   GNU General Public License for more details.
+#
+#   You should have received a copy of the GNU General Public License
+#   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+#
 
 "SMA" <-
 function(x, n=10) {
@@ -13,20 +27,8 @@ function(x, n=10) {
   # http://linnsoft.com/tour/techind/movAvg.htm
   # http://stockcharts.com/education/IndicatorAnalysis/indic_movingAvg.html
 
-  # Count NAs, ensure they're only at beginning of data, then remove.
-  NAs <- sum( is.na(x) )
-  if( NAs > 0 ) {
-    if( any( is.na(x[-(1:NAs)]) ) )
-      stop("Series contains non-leading NAs")
-  }
-  x   <- na.omit(x)
+  ma <- runMean( x, n )
 
-  ma <- runSum( x, n ) / n
-
-  # replace 1:(n-1) with NAs and prepend NAs from original data
-  ma[1:(n-1)] <- NA
-  ma <- c( rep( NA, NAs ), ma ) 
-  
   return(ma)
 }
 
@@ -42,19 +44,15 @@ function (x, n=10, wilder=FALSE, ratio=NULL) {
   # http://linnsoft.com/tour/techind/movAvg.htm
   # http://stockcharts.com/education/IndicatorAnalysis/indic_movingAvg.html
 
-  x   <- as.vector(x)
+  x <- try.xts(x, error=as.matrix)
   
   # Count NAs, ensure they're only at beginning of data, then remove.
-  NAs <- sum( is.na(x) )
-  if( NAs > 0 ) {
-    if( any( is.na(x[-(1:NAs)]) ) )
-      stop("Series contains non-leading NAs")
-  }
-  x   <- na.omit(x)
+  # Avoid na.omit() because it will cause problems for reclass()
+  x.na <- naCheck(x, n)
 
   # Initialize ma vector
   ma <- rep(1, NROW(x))
-  ma[n] <- mean(x[1:n])
+  ma[x.na$beg] <- mean(x[x.na$nonNA[1]:x.na$beg])
 
   # Determine decay ratio
   if(is.null(ratio)) {
@@ -63,19 +61,21 @@ function (x, n=10, wilder=FALSE, ratio=NULL) {
   }
 
   # Call Fortran routine
-  ma <- .Fortran( "ema", ia = as.double(x),
-                         lia = as.integer(NROW(x)),
+  ma <- .Fortran( "ema", ia = as.double(x[x.na$nonNA]),
+                         lia = as.integer(NROW(x.na$nonNA)),
                          n = as.integer(n),
-                         oa = as.double(ma),
-                         loa = as.integer(NROW(ma)),
+                         oa = as.double(ma[x.na$nonNA]),
+                         loa = as.integer(NROW(x.na$nonNA)),
                          ratio = as.double(ratio),
-                         PACKAGE = "TTR" )$oa
+                         PACKAGE = "TTR",
+                         DUP = FALSE )$oa
 
-  # replace 1:(n-1) with NAs and prepend NAs from original data
-  ma[1:(n-1)] <- NA
-  ma <- c( rep( NA, NAs ), ma ) 
+  # Replace 1:(n-1) with NAs and prepend NAs from original data
+  is.na(ma) <- c(1:(n-1))
+  ma <- c( rep( NA, x.na$NAs ), ma ) 
   
-  return(ma)
+  # Convert back to original class
+  reclass(ma, x)
 }
 
 #-------------------------------------------------------------------------#
@@ -87,7 +87,6 @@ function(x, n=10) {
 
   # http://www.fmlabs.com/reference/DEMA.htm
 
-  x <- as.vector(x)
   dema <- 2 * EMA(x,n) - EMA(EMA(x,n),n)
 
   return( dema )
@@ -135,7 +134,8 @@ function(x, n=10, wts=1:n) {
                            n = as.integer(n),
                            oa = as.double(x),
                            loa = as.integer(NROW(x)),
-                           PACKAGE = "TTR" )$oa
+                           PACKAGE = "TTR",
+                           DUP = TRUE )$oa
    
   } else {
     
@@ -195,7 +195,8 @@ function(price, volume, n=10) {
                            n = as.integer(n),
                            oa = as.double(ma),
                            loa = as.integer(NROW(ma)),
-                           PACKAGE = "TTR" )$oa
+                           PACKAGE = "TTR",
+                           DUP = FALSE )$oa
 
   # replace 1:(n-1) with NAs and prepend NAs from original data
   ma[1:(n-1)] <- NA
@@ -240,7 +241,8 @@ function (x, n=10, ratio=NULL) {
                            oa = as.double(ma),
                            loa = as.integer(NROW(ma)),
                            ratio = as.double(ratio),
-                           PACKAGE = "TTR" )$oa
+                           PACKAGE = "TTR",
+                           DUP = TRUE )$oa
 
   # replace 1:(n-1) with NAs and prepend NAs from original data
   ma[1:(n-1)] <- NA

@@ -8,14 +8,12 @@
   is a Welles Wilder's style moving average of the TR.  Developed by J. Welles Wilder in 1978.
 }
 \usage{
-  ATR(HLC, n=14, maType="EMA", wilder=TRUE, \dots)
+  ATR(HLC, n=14, maType, \dots)
 }
 \arguments{
-  \item{HLC}{ Object able to be coerced to a matrix, which contains High-Low-Close prices. }
+  \item{HLC}{ Object that is coercible to xts or matrix and contains High-Low-Close prices. }
   \item{n}{ Number of periods for moving average. }
   \item{maType}{ A function or a string naming the function to be called. }
-  \item{wilder}{ \emph{Only used for the default case.}  If \code{TRUE}, a Welles Wilder type EMA
-    will be calculated. }
   \item{\dots}{ Other arguments to be passed to the \code{maType} function. }
 }
 \details{
@@ -26,7 +24,8 @@
   The ATR is a component of the Welles Wilder Directional Movement Index (\code{DX}, \code{ADX}).
 }
 \value{
-  A matrix containing the columns:
+  A object of the same class as \code{HLC} or a matrix (if \code{try.xts}
+  fails) containing the columns:
   \item{ tr }{ The true range of the series. }
   \item{ atr }{ The average (as specified by \code{ma}) true range of the series. }
   \item{ true.high }{ The true high of the series. }
@@ -47,7 +46,6 @@
   See \code{\link{chaikinVolatility}} for another volatility measure. }
 \examples{
   data(ttrc)
-  atr <- ATR(ttrc[,c("High","Low","Close")],
-             n=14, maType="EMA", wilder=TRUE)
+  atr <- ATR(ttrc[,c("High","Low","Close")], n=14)
 }
 \keyword{ ts }

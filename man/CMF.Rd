@@ -10,7 +10,7 @@
   CMF(HLC, volume, n = 20)
 }
 \arguments{
-  \item{HLC}{ Object able to be coerced to a matrix, which contains High-Low-Close prices. }
+  \item{HLC}{ Object that is coercible to xts or matrix and contains High-Low-Close prices. }
   \item{volume}{ Vector or matrix of volume observations corresponding to the \code{HLC} object. }
   \item{n}{ Number of periods to use. }
 }
@@ -20,7 +20,8 @@
   \code{n} periods.
 }
 \value{
-  A vector containing the Chaikin Money Flow values.
+  A object of the same class as \code{HLC} and \code{volume} or a vector
+  (if \code{try.xts} fails) containing the Chaikin Money Flow values.
 }
 \author{ Josh Ulrich }
 \references{

@@ -1,10 +1,24 @@
-#-------------------------------------------------------------------------#
-# TTR, copyright (C) Joshua M. Ulrich, 2007                               #
-# Distributed under GNU GPL version 3                                     #
-#-------------------------------------------------------------------------#
+#
+#   TTR: Technical Trading Rules
+#
+#   Copyright (C) 2007-2008  Joshua M. Ulrich
+#
+#   This program is free software: you can redistribute it and/or modify
+#   it under the terms of the GNU General Public License as published by
+#   the Free Software Foundation, either version 3 of the License, or
+#   (at your option) any later version.
+#
+#   This program is distributed in the hope that it will be useful,
+#   but WITHOUT ANY WARRANTY; without even the implied warranty of
+#   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#   GNU General Public License for more details.
+#
+#   You should have received a copy of the GNU General Public License
+#   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+#
 
 "ATR" <-
-function(HLC, n=14, maType="EMA", wilder=TRUE, ...) {
+function(HLC, n=14, maType, ...) {
 
   # Average True Range / True Range
 
@@ -14,23 +28,30 @@ function(HLC, n=14, maType="EMA", wilder=TRUE, ...) {
   # http://www.linnsoft.com/tour/techind/trueRange.htm
   # http://stockcharts.com/education/IndicatorAnalysis/indic_ATR.html
 
-  HLC <- as.matrix(HLC)
-  closeLag <- c( HLC[1,3], HLC[-NROW(HLC),3] )
+  HLC <- try.xts(HLC, error=as.matrix)
+  
+  if(is.xts(HLC)) {
+    closeLag <- lag(HLC[,3])
+  } else {
+    closeLag <- c( NA, HLC[-NROW(HLC),3] )
+  }
 
-  trueHigh <- pmax( HLC[,1], closeLag )
-  trueLow  <- pmin( HLC[,2], closeLag )
+  trueHigh <- pmax( HLC[,1], closeLag, na.rm=FALSE )
+  trueLow  <- pmin( HLC[,2], closeLag, na.rm=FALSE )
   tr       <- trueHigh - trueLow
 
-  # If necessary, combine 'wilder' formal default with `...' arg(s)
-  if( missing(maType) && missing(wilder) ) {
-    maArgs <- list(n=n, wilder=TRUE)
-  } else
-  if( !missing(wilder) ) {
-    maArgs <- list(n=n, wilder=wilder, ...)
-  } else
-    maArgs <- list(n=n, ...)
+  maArgs <- list(n=n, ...)
+  
+  # Default Welles Wilder EMA
+  if(missing(maType)) {
+    maType <- 'EMA'
+    maArgs$wilder <- TRUE
+  }
 
   atr <- do.call( maType, c( list(tr), maArgs ) )
 
-  return( cbind( tr, atr, trueHigh, trueLow ) )
+  # Convert back to original class
+  result <- cbind( tr, atr, trueHigh, trueLow )
+  colnames(result) <- c('tr','atr','trueHigh','trueLow')
+  reclass( result, HLC )
 }

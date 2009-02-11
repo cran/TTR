@@ -8,10 +8,11 @@
   for any univariate series, not only price.
 }
 \usage{
-  MACD(x, nFast=12, nSlow=26, nSig=9, maType="EMA", percent=TRUE, \dots)
+  MACD(x, nFast=12, nSlow=26, nSig=9, maType, percent=TRUE, \dots)
 }
 \arguments{
-  \item{x}{ Series to use; usually price, but can be volume, etc. }
+  \item{x}{ Object that is coercible to xts or matrix; usually price,
+    but can be volume, etc. }
   \item{nFast}{ Number of periods for fast moving average. }
   \item{nSlow}{ Number of periods for slow moving average. }
   \item{nSig}{ Number of periods for signal moving average. }
@@ -27,7 +28,8 @@
   of change between the fast MA and the slow MA.
 }
 \value{
-  The MACD function returns a matrix containing the columns:
+  A object of the same class as \code{x} or a matrix (if \code{try.xts}
+  fails) containing the columns:
   \item{ macd }{ The price (volume, etc.) oscillator. }
   \item{ signal }{ The oscillator signal line (a moving average of the oscillator). }
 }

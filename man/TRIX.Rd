@@ -6,10 +6,10 @@
   Developed by Jack K. Hutson.
 }
 \usage{
-  TRIX(price, n=20, nSig=9, maType="EMA", percent=TRUE, \dots)
+  TRIX(price, n=20, nSig=9, maType, percent=TRUE, \dots)
 }
 \arguments{
-  \item{price}{ Price series to use. }
+  \item{price}{ Price series that is coercible to xts or matrix. }
   \item{n}{ Number of periods for moving average. }
   \item{nSig}{ Number of periods for signal line moving average. }
   \item{maType}{ Either: \cr(1) A function or a string naming the function to be called, or\cr
@@ -25,7 +25,8 @@
   trix = 100 * [ 3MA(t) / 3MA(t-1) - 1 ]
 }
 \value{
-  A vector containing the TRIX values.
+  A object of the same class as \code{price} or a vector (if \code{try.xts}
+  fails) containing the TRIX values.
 }
 \author{ Josh Ulrich }
 \references{

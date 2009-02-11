@@ -8,7 +8,7 @@
   CMO(x, n=14)
 }
 \arguments{
-  \item{x}{ Price, volume, etc. series to use. }
+  \item{x}{ Price, volume, etc. series that is coercible to xts or matrix. }
   \item{n}{ Number of periods to use. }
 }
 \details{
@@ -16,7 +16,8 @@
   RSI divides the upward movement by the net movement (up / [up + down]).
 }
 \value{
-  A vector containing Chande Momentum Oscillator values.
+  A object of the same class as \code{x} or a vector (if \code{try.xts}
+  fails) containing Chande Momentum Oscillator values.
 }
 \author{ Josh Ulrich }
 \references{
