@@ -12,10 +12,10 @@
   wilderSum(x, n=10)
 }
 \arguments{
-  \item{price}{ Price series to use. }
+  \item{price}{ Price series that is coercible to xts or matrix. }
   \item{signals}{ Signals to use (defaults to vector of ones).  Use '0' for no
     position, '1' for long position, and '-1' for short position. }
-  \item{x}{ Object able to be coerced to a matrix. }
+  \item{x}{ Object that is coercible to xts or matrix. }
   \item{n}{ Number of periods to use. }
   \item{\dots}{ Further arguments to be passed from or to other methods. }
 }
@@ -33,7 +33,7 @@
 
   \code{wilderSum} returns a vector of weighted sums.
 }
-\author{ Josh Ulrich }
+\author{ Joshua Ulrich }
 \note{
   In \code{growth} you can specify the number of periods and type of compounding
   to use when calculating returns of the price series via the \code{'\dots'} argument.

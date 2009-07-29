@@ -1,7 +1,21 @@
-#-------------------------------------------------------------------------#
-# TTR, copyright (C) Joshua M. Ulrich, 2007                               #
-# Distributed under GNU GPL version 3                                     #
-#-------------------------------------------------------------------------#
+#
+#   TTR: Technical Trading Rules
+#
+#   Copyright (C) 2007-2008  Joshua M. Ulrich
+#
+#   This program is free software: you can redistribute it and/or modify
+#   it under the terms of the GNU General Public License as published by
+#   the Free Software Foundation, either version 3 of the License, or
+#   (at your option) any later version.
+#
+#   This program is distributed in the hope that it will be useful,
+#   but WITHOUT ANY WARRANTY; without even the implied warranty of
+#   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#   GNU General Public License for more details.
+#
+#   You should have received a copy of the GNU General Public License
+#   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+#
 
 "CLV" <-
 function(HLC) {
@@ -10,12 +24,12 @@ function(HLC) {
 
   # http://stockcharts.com/education/IndicatorAnalysis/indic_AccumDistLine.html
 
-  HLC <- as.matrix(HLC)
+  HLC <- try.xts(HLC, error=as.matrix)
   clv <- ((HLC[,3]-HLC[,2]) - (HLC[,1]-HLC[,3])) / (HLC[,1]-HLC[,2])
 
   # Account for H=L=C
+  clv[is.nan(clv)] <- 0
 
-  clv <- replace(clv, match(NaN,clv), 0)
-
-  return( clv )
+  if(is.xts(clv)) colnames(clv) <- 'clv'
+  reclass( clv, HLC )
 }

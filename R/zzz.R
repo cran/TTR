@@ -1,3 +1,3 @@
-".First.lib" <- function(lib,pkg) {
-  library.dynam("TTR",pkg,lib)
-}
+#".onLoad" <- function(lib,pkg) {
+#  message("Technical Trading Rules (version 0.20-0)\n")
+#}

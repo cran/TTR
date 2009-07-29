@@ -7,11 +7,11 @@
   a period of time.  Developed by John Bollinger.
 }
 \usage{
-  BBands(HLC, n=20, maType="SMA", sd=2, \dots)
+  BBands(HLC, n=20, maType, sd=2, \dots)
 }
 \arguments{
-  \item{HLC}{ High-Low-Close price series to use.  If only a univariate series is given,
-    it will be used.  See details. }
+  \item{HLC}{ Object that is coercible to xts or matrix and contains High-Low-Close prices.
+   If only a univariate series is given, it will be used.  See details. }
   \item{n}{ Number of periods for moving average. }
   \item{maType}{ A function or a string naming the function to be called. }
   \item{sd}{ The number of standard deviations to use. }
@@ -28,13 +28,14 @@
   (e.g. Close, Weighted Close, Median Price, etc.) is provided, it will be used instead.
 }
 \value{
-  A matrix containing the columns:
+  A object of the same class as \code{HLC} or a matrix (if \code{try.xts}
+  fails) containing the columns:
   \item{ dn }{ The lower Bollinger Band. }
   \item{ ma }{ The middle Moving Average (see notes). }
   \item{ up }{ The upper Bollinger Band. }
   \item{ pctB }{ The \%B calculation. }
 }
-\author{ Josh Ulrich }
+\author{ Joshua Ulrich }
 \references{
   The following site(s) were used to code/document this indicator:\cr
   \url{http://www.fmlabs.com/reference/Bollinger.htm}\cr

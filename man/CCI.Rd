@@ -6,11 +6,11 @@
   The Commodity Channel Index (CCI) attempts to identify starting and ending trends.
 }
 \usage{
-  CCI(HLC, n=20, maType="SMA", c=0.015, \dots)
+  CCI(HLC, n=20, maType, c=0.015, \dots)
 }
 \arguments{
-  \item{HLC}{ High-Low-Close price series to use.  If only a univariate series is given,
-    it will be used.  See details. }
+  \item{HLC}{ Object that is coercible to xts or matrix and contains High-Low-Close prices.
+   If only a univariate series is given, it will be used.  See details. }
   \item{n}{ Number of periods for moving average. }
   \item{maType}{ A function or a string naming the function to be called. }
   \item{c}{ Constant to apply to the mean deviation. }
@@ -26,9 +26,10 @@
   (e.g. Close, Weighted Close, Median Price, etc.) is provided, it will be used instead.
 }
 \value{
-  A vector containing the CCI values.
+  A object of the same class as \code{HLC} or a vector (if \code{try.xts}
+  fails) containing the CCI values.
 }
-\author{ Josh Ulrich }
+\author{ Joshua Ulrich }
 \references{
   The following site(s) were used to code/document this indicator:\cr
   \url{http://www.fmlabs.com/reference/CCI.htm}\cr
@@ -43,8 +44,9 @@
 \seealso{
   See \code{\link{EMA}}, \code{\link{SMA}}, etc. for moving average options;
   and note Warning section.  See \code{\link{aroon}}, \code{\link{ADX}},
-  \code{\link{TDI}}, \code{\link{VHF}} for other indicators that measure trend
-  direction/strength. }
+  \code{\link{TDI}}, \code{\link{VHF}}, \code{\link{GMMA}} for other
+  indicators that measure trend direction/strength.
+}
 \examples{
   data(ttrc)
   cci <- CCI(ttrc[,c("High","Low","Close")])

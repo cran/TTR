@@ -9,7 +9,7 @@
   VHF(price, n=28)
 }
 \arguments{
-  \item{price}{ Object able to be coerced to a matrix, which contains either a Close price
+  \item{price}{ Object that is coercible to xts or matrix and contains a Close price
     series, or a High-Low-Close price series. }
   \item{n}{ Number of periods to use. }
 }
@@ -19,9 +19,10 @@
   sum of the close price changes.
 }
 \value{
-  A vector containing the VHF values.
+  A object of the same class as \code{price} or a vector (if \code{try.xts}
+  fails) containing the VHF values.
 }
-\author{ Josh Ulrich }
+\author{ Joshua Ulrich }
 \references{
   The following site(s) were used to code/document this indicator:\cr
   \url{http://www.fmlabs.com/reference/VHF.htm}\cr
@@ -32,8 +33,11 @@
   (the default).  If HLC prices are given, the function calculates the max/min using the
   high/low prices (added for flexibility).
 }
-\seealso{ See \code{\link{aroon}}, \code{\link{CCI}}, \code{\link{ADX}}, \code{\link{TDI}}
-          for other indicators that measure trend direction/strength. }
+\seealso{
+  See \code{\link{aroon}}, \code{\link{CCI}}, \code{\link{ADX}},
+  \code{\link{TDI}}, \code{\link{GMMA}} for other indicators that measure
+  trend direction/strength.
+}
 \examples{
   data(ttrc)
   vhf.close <- VHF(ttrc[,"Close"])

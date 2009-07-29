@@ -6,10 +6,10 @@
 }
 \usage{
   KST(price, n=c(10,10,10,15), nROC=c(10,15,20,30), nSig=9,
-         maType="SMA", wts=1:NROW(n), \dots)
+         maType, wts=1:NROW(n), \dots)
 }
 \arguments{
-  \item{price}{ Price series to use. }
+  \item{price}{ Price series that is coercible to xts or matrix. }
   \item{n}{ A vector of the number of periods to use in the MA calculations. }
   \item{nROC}{ A vector of the number of periods to use in the ROC calculations. }
   \item{nSig}{ The number of periods to use for the KST signal line. }
@@ -26,9 +26,10 @@
   weighting values.  The resulting values are summed for each day (month, week, etc.).
 }
 \value{
-  A vector containing the Know Sure Thing values.
+  A object of the same class as \code{price} or a vector (if \code{try.xts}
+  fails) containing the Know Sure Thing values.
 }
-\author{ Josh Ulrich }
+\author{ Joshua Ulrich }
 \references{
   The following site(s) were used to code/document this indicator:\cr
   \url{http://www.pring.com/index.html}\cr
@@ -52,5 +53,8 @@
 \examples{
   data(ttrc)
   kst <- KST(ttrc[,"Close"])
+  
+  kst4MA <- KST(ttrc[,"Close"],
+    maType=list(list(SMA),list(EMA),list(DEMA),list(WMA)))
 }
 \keyword{ ts }

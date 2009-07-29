@@ -1,106 +1,38 @@
-TTR version 0.14-0
-  Changes from version 0.13-2
+TTR version 0.20-0
+  Changes from version 0.2-1
 
 
-New Features:
+NEW FEATURES:
 
-- Changed MA-type args and updated documentation for: RSIm ADX, ATR,
-  CCI, DPO, EMV, RSI, BBands, chaikinVolatility, stoch, SMI, TRIX,
-  MACD, and KST
+- adjRatios() creates split and/or dividend adjustment ratio
+  series via C code.
 
-- Added Stochastic Momentum Index (SMI) and williamsAD functions
-  and documentation
+- GMMA() calculates the Guppy Multiple Moving Average
 
-- Added Fortran implementations of SMA, EMA, WMA, EVWMA, ZLEMA, PSAR
+- volatility() now has Yang Zhang, and Garman-Klass (Yang Zhang)
+  calculations.
 
-- Added NA checking/handling for many functions
+- The functions below now have cumulative argument.  This allows the
+  calculation of "from inception" running series.
+    - runSum, runMin, runMax
+    - runMean, runMedian
+    - runCov, runCor, runVar, runSD, runMAD
 
-- Added 'ratio' argument to EMA with default=NULL
-
-- Changed all usage of 'rollFun' to their respective Fortran
-  implementations and removed the 'rollFun' function.  Added Fortran
-  based functions are: runSum, wilderSum, runMin, runMax, runMean,
-  runCov, runCor, runVar, runSD, runMedian, runMAD
-
-
-Changes:
-
-- Changed 'CCI' to use 'runMAD'
-
-- Set 'na=NA' for 'momentum' and 'ROC' functions in files KST.R,
-  RSI.R, and TDI.R, and changed 'ROC' to use 'type="discrete"'
-  in 'chaikinVolatility.R'
-
-- Changed default 'type' of 'ROC' to 'continuous'
-
-- Made the following changes to the 'ZLEMA' function:
-   - Add ratio argument with default = NULL
-   - Non-integer lags are a weighted mean of the two nearest
-     observations, based on thier proximity to the lag value
-   - Change 'lag = ratio^(-1)' to fully support 'ratio' argument
-
-- Changed the 'BBands' function's 'sd' argument from a list
-  that allows other dispersion functions to simply indicate the
-  number of standard deviations to use
-
-- Changed 'BBands' %B output value from 'pct.b' to 'pctB'
-
-- Changed 'WPR' output value from 'pct.R' to 'pctR'
-
-- Changed 'WPR' MA output value from 'ma.emv' to 'emvMA'
-
-- Changed 'aroon' output values from 'aroon.xx' to 'aroonXx'
-
-- Renamed:
-    'chaikinMF' to 'CMF'
-    'stochastic' to 'stoch'
-    'bollingerBands' to 'BBands'
-
-- Added NAMESPACE 
-
-- Added copyright information at the top of each file (.R and .f)
-
-- Removed all DOS EOL characters via 'vim +"argdo set ff=unix" +wqa *'
+- Added internal smoothing to FastK in stoch() via 'smooth' argument
+  (thanks to Stanley Neo).
 
 
-Deprecated/Defunct:
+CHANGES:
 
-- Removed 'oscillator' function and transferred functionality
-  to 'MACD' function
+- Removed message from .onLoad()
 
-- Removed chaikinOscillator, since it can be created via
-  MACD( chaikinAD )
+- getYahooData() now uses adjRatios(), which yields significant
+  improvements for larger data sets.
 
 
-Bug Fixes:
+BUG FIXES:
 
-- match.arg(type) in ROC changed to simple subsetting of type
+- Fixed version number; 0.20-0 is now > 0.14-0 (rookie mistake)
 
-- Changed trailing zeros to trailing NAs in DPO
-
-- Fixed 'WMA' bug that allowed 'x' and 'wts' vectors to have different
-  length if either series had leading NAs (similar to EVWMA function)
-
-- Fixed 'runCov' bug that allowed 'x' and 'y' vectors to have different
-  length if either series had leading NAs (similar to EVWMA function)
-
-- Corrected EVWMA to start at period 'n' instead of 'n-1'
-
-- Removed 'message' function from CCI.R, VHF.R, WPR.R, aroon.R
-  bollingerBands.R, and stochastics.R
-
-- Change \sQuote{x} to 'x' in documentation
-
-- Changed documentation so "Usage", "Examples" section are a max of
-  ~65-70 characters wide; it now prints better in plain text help
-
-- Updated "detail" section of 'MovingAverages.Rd' via enclosing
-  function names in "\code{}" brackets
-
-- Changed "title" section of 'WPR.Rd' to remove unnecessary "\"
-
-- Removed "detail" section from 'runFun.Rd' and replaced "\code{}"
-  brackets in "value" section with "\item{}" brackets
-
-- Changed "site(s)" to "sites" in "references" section of "TTR.Rd",
-  and included "runFun" in list of interesting functions
+- Fixed bug when maType was a list and 'n' was not specified in maType.
+  This affected: stoch(), SMI(), RSI(), KST(), MACD(), TRIX().

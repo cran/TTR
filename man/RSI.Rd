@@ -6,16 +6,14 @@
   movements to the absolute price movement.  Developed by J. Welles Wilder.
 }
 \usage{
-  RSI(price, n=14, maType="EMA", wilder=TRUE, \dots)
+  RSI(price, n=14, maType, \dots)
 }
 \arguments{
-  \item{price}{ Price series to use. }
+  \item{price}{ Price series that is coercible to xts or matrix. }
   \item{n}{ Number of periods for moving averages. }
   \item{maType}{ Either: \cr(1) A function or a string naming the function to be called, or\cr
     (2) a \emph{list} with the first component like (1) above, and additional parameters
     specified as \emph{named} components.  See Examples. }
-  \item{wilder}{ \emph{Only used for the default case.}  If \code{TRUE}, a Welles Wilder type EMA
-    will be calculated. }
   \item{\dots}{ Other arguments to be passed to the \code{maType} function in case (1) above. }
 }
 \details{
@@ -24,9 +22,10 @@
   averages, since they're divided by the value of \code{n} not the number of gain/loss periods.
 }
 \value{
-  A vector containing the RSI values.
+  A object of the same class as \code{price} or a vector (if \code{try.xts}
+  fails) containing the RSI values.
 }
-\author{ Josh Ulrich }
+\author{ Joshua Ulrich }
 \references{
   The following site(s) were used to code/document this indicator:\cr
   \url{http://www.fmlabs.com/reference/RSI.htm}\cr

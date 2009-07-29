@@ -1,40 +1,64 @@
-#-------------------------------------------------------------------------#
-# TTR, copyright (C) Joshua M. Ulrich, 2007                               #
-# Distributed under GNU GPL version 3                                     #
-#-------------------------------------------------------------------------#
+#
+#   TTR: Technical Trading Rules
+#
+#   Copyright (C) 2007-2008  Joshua M. Ulrich
+#
+#   This program is free software: you can redistribute it and/or modify
+#   it under the terms of the GNU General Public License as published by
+#   the Free Software Foundation, either version 3 of the License, or
+#   (at your option) any later version.
+#
+#   This program is distributed in the hope that it will be useful,
+#   but WITHOUT ANY WARRANTY; without even the implied warranty of
+#   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#   GNU General Public License for more details.
+#
+#   You should have received a copy of the GNU General Public License
+#   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+#
 
 "runSum" <-
-function(x, n=10) {
+function(x, n=10, cumulative=FALSE) {
 
-  x   <- as.vector(x)
+  x <- try.xts(x, error=as.matrix)
 
   if( n < 1 || n > NROW(x) ) stop("Invalid 'n'")
 
-  # Count NAs, ensure they're only at beginning of data, then remove.
-  NAs <- sum( is.na(x) )
+  # Count NAs, ensure they're only at beginning of data.
+  NAs <- sum(is.na(x))
   if( NAs > 0 ) {
     if( any( is.na(x[-(1:NAs)]) ) ) stop("Series contains non-leading NAs")
   }
-  x   <- na.omit(x)
+  beg <- 1 + NAs
+  len <- NROW(x) - NAs
 
   # Initialize result vector 
-  result <- rep(0,NROW(x))
-  result[n] <- sum(x[1:n])
+  result <- double(NROW(x))
 
-  # Call Fortran routine
-  result <- .Fortran( "runsum",
-                   ia = as.double(x),
-                   lia = as.integer(NROW(x)),
-                   n = as.integer(n),
-                   oa = as.double(result),
-                   loa = as.integer(NROW(result)),
-                   PACKAGE = "TTR" )$oa
+  if(cumulative) {
+    result[beg:NROW(x)] <- cumsum(x[beg:NROW(x)])
+  } else {
+    result[(n+beg-1)] <- sum(x[beg:(n+beg-1)])
 
-  # Replace 1:(n-1) with NAs and prepend NAs from original data
-  result[1:(n-1)] <- NA
-  result <- c( rep( NA, NAs ), result )
+    # Call Fortran routine
+    result <- .Fortran( "runsum",
+                     ia = as.double(x[beg:NROW(x)]),
+                     lia = as.integer(len),
+                     n = as.integer(n),
+                     oa = as.double(result[beg:NROW(x)]),
+                     loa = as.integer(len),
+                     PACKAGE = "TTR",
+                     DUP = FALSE )$oa
+    
+    # Prepend NAs from original data
+    result <- c( rep( NA, NAs ), result )
+  }
+  
+  # Replace 1:(n-1) with NAs
+  is.na(result) <- c(1:(n-1+NAs))
 
-  return( result )
+  # Convert back to original class
+  reclass(result, x)
 }
 
 #-------------------------------------------------------------------------#
@@ -42,7 +66,7 @@ function(x, n=10) {
 "wilderSum" <-
 function(x, n=10) {
 
-  x   <- as.vector(x)
+  x <- try.xts(x, error=as.matrix)
 
   if( n < 1 || n > NROW(x) ) stop("Invalid 'n'")
 
@@ -51,32 +75,32 @@ function(x, n=10) {
   if( NAs > 0 ) {
     if( any( is.na(x[-(1:NAs)]) ) ) stop("Series contains non-leading NAs")
   }
-  x   <- na.omit(x)
-
-  # Initialize result vector 
-  result <- x
+  beg <- 1 + NAs
+  len <- NROW(x) - NAs
 
   result <- .Fortran( "wilder",
-                   ia  = as.double(x),
-                   lia = as.integer(NROW(x)),
+                   ia  = as.double(x[beg:NROW(x)]),
+                   lia = as.integer(len),
                    n   = as.integer(n),
-                   oa  = as.double(result),
-                   loa = as.integer(NROW(result)),
-                   PACKAGE = "TTR" )$oa
+                   oa  = as.double(x[beg:NROW(x)]),
+                   loa = as.integer(len),
+                   PACKAGE = "TTR",
+                   DUP = FALSE )$oa
 
   # Replace 1:(n-1) with NAs and prepend NAs from original data
-  result[1:(n-1)] <- NA
+  is.na(result) <- c(1:(n-1))
   result <- c( rep( NA, NAs ), result )
 
-  return( result )
+  # Convert back to original class
+  reclass(result, x)
 }
 
 #-------------------------------------------------------------------------#
 
 "runMin" <-
-function(x, n=10) {
+function(x, n=10, cumulative=FALSE) {
 
-  x   <- as.vector(x)
+  x <- try.xts(x, error=as.matrix)
 
   if( n < 1 || n > NROW(x) ) stop("Invalid 'n'")
 
@@ -85,33 +109,43 @@ function(x, n=10) {
   if( NAs > 0 ) {
     if( any( is.na(x[-(1:NAs)]) ) ) stop("Series contains non-leading NAs")
   }
-  x   <- na.omit(x)
+  beg <- 1 + NAs
+  len <- NROW(x) - NAs
 
   # Initialize result vector 
-  result <- rep(0,NROW(x))
-  result[n] <- min(x[1:n])
+  result <- double(NROW(x))
+  
+  if(cumulative) {
+    result[beg:NROW(x)] <- cummin(x[beg:NROW(x)])
+  } else {
+    result[(n+beg-1)] <- min(x[beg:(n+beg-1)])
 
-  result <- .Fortran( "runmin",
-                   ia = as.double(x),
-                   lia = as.integer(NROW(x)),
-                   n = as.integer(n),
-                   oa = as.double(result),
-                   loa = as.integer(NROW(result)),
-                   PACKAGE = "TTR" )$oa
+    result <- .Fortran( "runmin",
+                     ia = as.double(x[beg:NROW(x)]),
+                     lia = as.integer(len),
+                     n = as.integer(n),
+                     oa = as.double(result[beg:NROW(x)]),
+                     loa = as.integer(len),
+                     PACKAGE = "TTR",
+                     DUP = FALSE )$oa
 
-  # Replace 1:(n-1) with NAs and prepend NAs from original data
-  result[1:(n-1)] <- NA
-  result <- c( rep( NA, NAs ), result )
+    # Prepend NAs from original data
+    result <- c( rep( NA, NAs ), result )
+  }
+  
+  # Replace 1:(n-1) with NAs
+  is.na(result) <- c(1:(n-1+NAs))
 
-  return( result )
+  # Convert back to original class
+  reclass(result, x)
 }
 
 #-------------------------------------------------------------------------#
 
 "runMax" <-
-function(x, n=10) {
+function(x, n=10, cumulative=FALSE) {
 
-  x   <- as.vector(x)
+  x <- try.xts(x, error=as.matrix)
   
   if( n < 1 || n > NROW(x) ) stop("Invalid 'n'")
 
@@ -120,33 +154,45 @@ function(x, n=10) {
   if( NAs > 0 ) {
     if( any( is.na(x[-(1:NAs)]) ) ) stop("Series contains non-leading NAs")
   }
-  x   <- na.omit(x)
+  beg <- 1 + NAs
+  len <- NROW(x) - NAs
 
   # Initialize result vector 
-  result <- rep(0,NROW(x))
-  result[n] <- max(x[1:n])
+  result <- double(NROW(x))
 
-  result <- .Fortran( "runmax",
-                   ia = as.double(x),
-                   lia = as.integer(NROW(x)),
-                   n = as.integer(n),
-                   oa = as.double(result),
-                   loa = as.integer(NROW(result)),
-                   PACKAGE = "TTR" )$oa
+  if(cumulative) {
+    result[beg:NROW(x)] <- cummax(x[beg:NROW(x)])
+  } else {
+    result[(n+beg-1)] <- max(x[beg:(n+beg-1)])
+
+    result <- .Fortran( "runmax",
+                     ia = as.double(x[beg:NROW(x)]),
+                     lia = as.integer(len),
+                     n = as.integer(n),
+                     oa = as.double(result[beg:NROW(x)]),
+                     loa = as.integer(len),
+                     PACKAGE = "TTR",
+                     DUP = FALSE )$oa
+  }
 
   # Replace 1:(n-1) with NAs and prepend NAs from original data
-  result[1:(n-1)] <- NA
+  is.na(result) <- c(1:(n-1))
   result <- c( rep( NA, NAs ), result )
 
-  return( result )
+  # Convert back to original class
+  reclass(result, x)
 }
 
 #-------------------------------------------------------------------------#
 
 "runMean" <-
-function(x, n=10) {
+function(x, n=10, cumulative=FALSE) {
 
-  result <- runSum(x, n) / n
+  if(cumulative) {
+    result <- runSum(x, n, cumulative) / 1:NROW(x)
+  } else {
+    result <- runSum(x, n) / n
+  }
 
   return(result)
 }
@@ -154,9 +200,9 @@ function(x, n=10) {
 #-------------------------------------------------------------------------#
 
 "runMedian" <-
-function(x, n=10, low=FALSE, high=FALSE) {
+function(x, n=10, non.unique="mean", cumulative=FALSE) {
 
-  x   <- as.vector(x)
+  x <- try.xts(x, error=as.matrix)
 
   if( n < 1 || n > NROW(x) ) stop("Invalid 'n'")
 
@@ -165,33 +211,44 @@ function(x, n=10, low=FALSE, high=FALSE) {
   if( NAs > 0 ) {
     if( any( is.na(x[-(1:NAs)]) ) ) stop("Series contains non-leading NAs")
   }
-  x   <- na.omit(x)
+  beg <- 1 + NAs
+  len <- NROW(x) - NAs
 
-  # Initialize result vector 
-  result <- rep(0,NROW(x))
-
+  # Non-unique median
+  non.unique <- match.arg(non.unique, c('mean','max','min'))
+  non.unique <- switch( non.unique, mean=0, max=1, min=-1 )
+  
   # Call Fortran routine
   result <- .Fortran( "runmedian",
-                   ia = as.double(x),
+                   ia = as.double(x[beg:NROW(x)]),
                    n = as.integer(n),
-                   oa = double(NROW(x)),
-                   la = as.integer(NROW(x)),
-                   ver = as.integer(version),
-                   PACKAGE = "TTR" )$oa
+                   oa = double(len),
+                   la = as.integer(len),
+                   ver = as.integer(non.unique),
+                   cu = as.integer(cumulative),
+                   PACKAGE = "TTR",
+                   DUP = FALSE )$oa
 
   # Replace 1:(n-1) with NAs and prepend NAs from original data
-  result[1:(n-1)] <- NA
+  is.na(result) <- c(1:(n-1))
   result <- c( rep( NA, NAs ), result )
 
-  return( result )
+  # Convert back to original class
+  reclass(result, x)
 }
 
 #-------------------------------------------------------------------------#
 
 "runCov" <-
-function(x, y, n=10, use="all.obs", sample=TRUE) {
+function(x, y, n=10, use="all.obs", sample=TRUE, cumulative=FALSE) {
 
-  xy <- cbind( as.vector(x), as.vector(y) )
+  x <- try.xts(x, error=as.matrix)
+  y <- try.xts(y, error=as.matrix)
+  if(is.xts(x) && is.xts(y)) {
+    xy <- cbind(x,y)
+  } else {
+    xy <- cbind( as.vector(x), as.vector(y) )
+  }
 
   if( n < 1 || n > NROW(x) ) stop("Invalid 'n'")
 
@@ -204,42 +261,45 @@ function(x, y, n=10, use="all.obs", sample=TRUE) {
   if( NAs > 0 ) {
     if( any( is.na(xy[-(1:NAs),]) ) ) stop("Series contain non-leading NAs")
   }
-  xy <- na.omit(xy)
+  beg <- 1 + NAs
+  len <- NROW(xy) - NAs
   
-  xCenter <- runSum(x, n)/n
-  xCenter[1:(n-1)] <- 0
-  yCenter <- runSum(y, n)/n
-  yCenter[1:(n-1)] <- 0
-
-  # Initialize result vector 
-  result <- rep(0,NROW(xy))
+  xCenter <- runMean(x, n, cumulative)
+  xCenter[1:(NAs+n-1)] <- 0
+  yCenter <- runMean(y, n, cumulative)
+  yCenter[1:(NAs+n-1)] <- 0
 
   # Call Fortran routine
   result <- .Fortran( "runCov",
-                   rs1 = as.double(x),
-                   avg1 = as.double(xCenter),
-                   rs2 = as.double(y),
-                   avg2 = as.double(yCenter),
-                   la = as.integer(NROW(x)),
+                   rs1 = as.double(x[beg:NROW(xy)]),
+                   avg1 = as.double(xCenter[beg:NROW(xy)]),
+                   rs2 = as.double(y[beg:NROW(xy)]),
+                   avg2 = as.double(yCenter[beg:NROW(xy)]),
+                   la = as.integer(len),
                    n = as.integer(n),
                    samp = as.integer(sample),
-                   oa = as.double(result),
-                   PACKAGE = "TTR" )$oa
+                   oa = double(len),
+                   cu = as.integer(cumulative),
+                   PACKAGE = "TTR",
+                   DUP = FALSE )$oa
 
   # Replace 1:(n-1) with NAs and prepend NAs from original data
-  result[1:(n-1)] <- NA
+  is.na(result) <- c(1:(n-1))
   result <- c( rep( NA, NAs ), result )
 
-  return( result )
+  # Convert back to original class
+  # Should the attributes of *both* x and y be retained?
+  reclass(result, x)
 }
 
 #-------------------------------------------------------------------------#
 
 "runCor" <-
-function(x, y, n=10, use="all.obs", sample=TRUE) {
+function(x, y, n=10, use="all.obs", sample=TRUE, cumulative=FALSE) {
 
-  result <- runCov(x, y, n, use=use, sample=sample ) /
-            ( runSD(x, n, sample=sample) * runSD(y, n, sample=sample) )
+  result <- runCov(x, y, n, use=use, sample=sample, cumulative) /
+            ( runSD(x, n, sample=sample, cumulative) *
+              runSD(y, n, sample=sample, cumulative) )
 
   return( result )
 }
@@ -247,9 +307,10 @@ function(x, y, n=10, use="all.obs", sample=TRUE) {
 #-------------------------------------------------------------------------#
 
 "runVar" <-
-function(x, n=10, sample=TRUE) {
+function(x, y=NULL, n=10, sample=TRUE, cumulative=FALSE) {
 
-  result <- runCov(x, x, n, use="all.obs", sample=sample)
+  if(is.null(y)) y <- x
+  result <- runCov(x, y, n, use="all.obs", sample=sample, cumulative)
 
   return( result )
 }
@@ -257,9 +318,10 @@ function(x, n=10, sample=TRUE) {
 #-------------------------------------------------------------------------#
 
 "runSD" <-
-function(x, n=10, sample=TRUE) {
+function(x, n=10, sample=TRUE, cumulative=FALSE) {
 
-  result <- sqrt( runCov(x, x, n, use="all.obs", sample=sample) )
+  result <- sqrt( runCov(x, x, n, use="all.obs",
+                  sample=sample, cumulative) )
 
   return( result )
 }
@@ -267,10 +329,10 @@ function(x, n=10, sample=TRUE) {
 #-------------------------------------------------------------------------#
 
 "runMAD" <-
-function(x, n=10, center=runMedian(x, n), stat="median",
-         constant=1.4826, low=FALSE, high=FALSE) {
+function(x, n=10, center=NULL, stat="median",
+         constant=1.4826, non.unique="mean", cumulative=FALSE) {
 
-  x   <- as.vector(x)
+  x <- try.xts(x, error=as.matrix)
 
   if( n < 1 || n > NROW(x) ) stop("Invalid 'n'")
 
@@ -279,40 +341,41 @@ function(x, n=10, center=runMedian(x, n), stat="median",
   if( NAs > 0 ) {
     if( any( is.na(x[-(1:NAs)]) ) ) stop("Series contains non-leading NAs")
   }
-  x   <- na.omit(x)
-  center[1:(n-1)] <- 0
-
-  # Initialize result vector 
-  result <- rep(0,NROW(x))
+  beg <- 1 + NAs
+  len <- NROW(x) - NAs
+  
+  if(is.null(center)) {
+    center <- runMedian(x, n, cumulative=cumulative)
+  }
+  center[1:(NAs+n-1)] <- 0
 
   # Mean or Median absolute deviation?
   median <- match.arg(stat, c("mean","median"))
   median <- switch( stat, median=TRUE, mean=FALSE )
 
-  # 'version' = f( low, high )
-  if( low && high )
-    stop("'low' and 'high' cannot be both TRUE")
-  version <- 0
-  if( low )  version <- -1
-  if( high )  version <- 1
-
-
+  # Non-unique median
+  non.unique <- match.arg(non.unique, c('mean','max','min'))
+  non.unique <- switch( non.unique, mean=0, max=1, min=-1 )
+  
   # Call Fortran routine
   result <- .Fortran( "runMAD",
-                   rs = as.double(x),
-                   cs = as.double(center),
-                   la = as.integer(NROW(x)),
-                   n = as.integer(n),
-                   oa = as.double(result),
-                   stat = as.integer(median),
-                   ver = as.integer(version),
-                   PACKAGE = "TTR" )$oa
+                   rs = as.double(x[beg:NROW(x)]),      # raw series
+                   cs = as.double(center[beg:NROW(x)]), # center series
+                   la = as.integer(len),                # length of input arrays
+                   n = as.integer(n),                   # size of rolling window
+                   oa = double(len),                    # output array
+                   stat = as.integer(median),           # center statistic
+                   ver = as.integer(non.unique),        # median type
+                   cu = as.integer(cumulative),         # from inception
+                   PACKAGE = "TTR",
+                   DUP = FALSE )$oa
 
   if( median ) result <- result * constant
 
   # Replace 1:(n-1) with NAs and prepend NAs from original data
-  result[1:(n-1)] <- NA
+  is.na(result) <- c(1:(n-1))
   result <- c( rep( NA, NAs ), result )
 
-  return( result )
+  # Convert back to original class
+  reclass(result, x)
 }

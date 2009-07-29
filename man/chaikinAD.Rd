@@ -9,7 +9,7 @@
   chaikinAD(HLC, volume)
 }
 \arguments{
-  \item{HLC}{ Object able to be coerced to a matrix, which contains High-Low-Close prices. }
+  \item{HLC}{ Object that is coercible to xts or matrix and contains High-Low-Close prices. }
   \item{volume}{ Vector or matrix of volume observations corresponding to the \code{HLC} object. }
 }
 \details{
@@ -18,9 +18,10 @@
   by the close location value (CLV).
 }
 \value{
-  A vector containing the accumulation / distribution values.
+  A object of the same class as \code{HLC} and \code{volume} or a vector
+  (if \code{try.xts} fails) containing the accumulation / distribution values.
 }
-\author{ Josh Ulrich }
+\author{ Joshua Ulrich }
 \references{
   The following site(s) were used to code/document this indicator:\cr
   \url{http://www.fmlabs.com/reference/AccumDist.htm}\cr

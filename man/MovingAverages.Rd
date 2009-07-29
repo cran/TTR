@@ -20,9 +20,10 @@ EVWMA(price, volume, n=10)
 ZLEMA(x, n=10, ratio=NULL)
 }
 \arguments{
-  \item{x}{ Vector to be averaged. }
-  \item{price}{ Vector of prices to be averaged. }
-  \item{volume}{ Volume series corresponding to price series, or a constant.  See Notes. }
+  \item{x}{ Price, volume, etc. series that is coercible to xts or matrix. }
+  \item{price}{ Price series that is coercible to xts or matrix. }
+  \item{volume}{ Volume series that is coercible to xts or matrix, that 
+    corresponds to price series, or a constant.  See Notes. }
   \item{n}{ Number of periods to average over. }
   \item{wts}{ Vector of weights.  Length of \code{wts} vector must equal the
     length of \code{x}, or \code{n} (the default). }
@@ -49,6 +50,8 @@ ZLEMA(x, n=10, ratio=NULL)
   the cumulative effect.
 }
 \value{
+  A object of the same class as \code{x} or \code{price} or a vector
+  (if \code{try.xts} fails) containing the columns:
   \item{SMA}{ Simple moving average. }
   \item{EMA}{ Exponential moving average. }
   \item{WMA}{ Weighted moving average. }
@@ -56,7 +59,7 @@ ZLEMA(x, n=10, ratio=NULL)
   \item{EVWMA}{ Elastic, volume-weighted moving average. }
   \item{ZLEMA}{ Zero lag exponential moving average. }
 }
-\author{ Josh Ulrich }
+\author{ Joshua Ulrich }
 \references{
   The following site(s) were used to code/document this indicator:\cr
   \url{http://www.fmlabs.com/reference/ExpMA.htm}\cr

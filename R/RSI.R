@@ -1,10 +1,24 @@
-#-------------------------------------------------------------------------#
-# TTR, copyright (C) Joshua M. Ulrich, 2007                               #
-# Distributed under GNU GPL version 3                                     #
-#-------------------------------------------------------------------------#
+#
+#   TTR: Technical Trading Rules
+#
+#   Copyright (C) 2007-2008  Joshua M. Ulrich
+#
+#   This program is free software: you can redistribute it and/or modify
+#   it under the terms of the GNU General Public License as published by
+#   the Free Software Foundation, either version 3 of the License, or
+#   (at your option) any later version.
+#
+#   This program is distributed in the hope that it will be useful,
+#   but WITHOUT ANY WARRANTY; without even the implied warranty of
+#   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#   GNU General Public License for more details.
+#
+#   You should have received a copy of the GNU General Public License
+#   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+#
 
 "RSI" <- 
-function(price, n=14, maType="EMA", wilder=TRUE, ...) {
+function(price, n=14, maType, ...) {
 
   # Relative Strength Index
 
@@ -18,23 +32,28 @@ function(price, n=14, maType="EMA", wilder=TRUE, ...) {
   # http://www.fmlabs.com/reference/StochRSI.htm
   # http://stockcharts.com/education/IndicatorAnalysis/indic_stochRSI.html
 
-  up <- momentum(price, n=1, na=NA)
+  up <- momentum(price, n=1, na.pad=TRUE)
   dn <- ifelse(up<0, abs(up), 0)
   up <- ifelse(up>0,     up , 0)
 
-  # If necessary, combine 'wilder' formal default with `...' arg(s)
-  if( missing(maType) && missing(wilder) ) {
-    maArgs <- list(n=n, wilder=TRUE)
-  } else
-  if( !missing(wilder) ) {
-    maArgs <- list(n=n, wilder=wilder, ...)
-  } else
-    maArgs <- list(n=n, ...)
+  maArgs <- list(n=n, ...)
+  # Default Welles Wilder EMA
+  if(missing(maType)) {
+    maType <- 'EMA'
+    maArgs$wilder <- TRUE
+  }
 
   # Case of two different 'maType's for both MAs.
   # e.g. RSI(price, n=14, maType=list(maUp=list(EMA,ratio=1/5), maDown=list(WMA,wts=1:10)) )
   if( is.list(maType) ) {
 
+    # Make sure maType is a list of lists
+    maTypeInfo <- sapply(maType,is.list)
+    if( !(all(maTypeInfo) && length(maTypeInfo) == 2) ) {
+      stop("If \'maType\' is a list, you must specify\n ",
+      "*two* MAs (see Examples section of ?RSI)")
+    }
+    
     # If MA function has 'n' arg, see if it's populated in maType;
     # if it isn't, populate it with RSI's formal 'n'
     for(i in 1:length(maType)) {

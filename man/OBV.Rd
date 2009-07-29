@@ -9,18 +9,19 @@
   OBV(price, volume)
 }
 \arguments{
-  \item{price}{ Price series to use. }
-  \item{volume}{ Vector or matrix of volume observations corresponding
-                 to \code{price} object. }
+  \item{price}{ Price series that is coercible to xts or matrix. }
+  \item{volume}{ Volume series that is coercible to xts or matrix, that 
+    corresponds to price object. }
 }
 \details{
   OBV is calculated by adding (subtracting) each day's volume to a running cumulative
   total when the security's price closes higher (lower).
 }
 \value{
-  A vector containing the OBV values.
+  A object of the same class as \code{price} and \code{volume} or a vector
+  (if \code{try.xts} fails) containing the OBV values.
 }
-\author{ Josh Ulrich }
+\author{ Joshua Ulrich }
 \references{
   The following site(s) were used to code/document this indicator:\cr
   \url{http://www.fmlabs.com/reference/OBV.htm}\cr

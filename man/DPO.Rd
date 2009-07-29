@@ -6,10 +6,10 @@
   by subtracting a moving average of the price from the price.
 }
 \usage{
-  DPO(x, n=10, maType="SMA", shift=n/2+1, percent=FALSE, \dots)
+  DPO(x, n=10, maType, shift=n/2+1, percent=FALSE, \dots)
 }
 \arguments{
-  \item{x}{ Price, volume, etc. series to use. }
+  \item{x}{ Price, volume, etc. series that is coercible to xts or matrix. }
   \item{n}{ Number of periods for moving average. }
   \item{maType}{ A function or a string naming the function to be called. }
   \item{shift}{ The number of periods to shift the moving average. }
@@ -22,9 +22,10 @@
   shifts the results \code{shift} periods, so the last \code{shift} periods will be zero.
 }
 \value{
-  A vector containing the DPO values.
+  A object of the same class as \code{x} or a vector (if \code{try.xts}
+  fails) containing the DPO values.
 }
-\author{ Josh Ulrich }
+\author{ Joshua Ulrich }
 \references{
   The following site(s) were used to code/document this indicator:\cr
   \url{http://www.fmlabs.com/reference/DPO.htm}\cr

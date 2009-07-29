@@ -12,8 +12,8 @@
   \tabular{ll}{
     Package: \tab TTR\cr
     Type: \tab Package\cr
-    Version: \tab 0.14-0\cr
-    Date: \tab 2008-01-23\cr
+    Version: \tab 0.20-0\cr
+    Date: \tab 2009-07-29\cr
     License: \tab GPL Version 3 or later.\cr
   }
 
@@ -29,9 +29,9 @@
   \code{\link{WebData}}\cr
 }
 \author{
-Josh Ulrich
+Joshua Ulrich
 
-Maintainer: Josh Ulrich
+Maintainer: Joshua Ulrich
 }
 \references{
   The following sites were used to code/document this package:\cr

@@ -6,10 +6,10 @@
   Developed by Marc Chaikin.
 }
 \usage{
-  chaikinVolatility(HL, n=10, maType="EMA", \dots)
+  chaikinVolatility(HL, n=10, maType, \dots)
 }
 \arguments{
-  \item{HL}{ Object able to be coerced to a matrix, which contains High-Low prices. }
+  \item{HL}{ Object that is coercible to xts or matrix and contains High-Low prices. }
   \item{n}{ Number of periods for moving average. }
   \item{maType}{ A function or a string naming the function to be called. }
   \item{\dots}{ Other arguments to be passed to the \code{maType} function. }
@@ -19,9 +19,10 @@
   between the high and low.
 }
 \value{
-  A vector containing the Chaikin Volatility values.
+  A object of the same class as \code{HL} or a vector (if \code{try.xts}
+  fails) containing the Chaikin Volatility values.
 }
-\author{ Josh Ulrich }
+\author{ Joshua Ulrich }
 \references{
   The following site(s) were used to code/document this indicator:\cr
   \url{http://www.fmlabs.com/reference/ChaikinVolatility.htm}\cr
