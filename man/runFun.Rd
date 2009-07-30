@@ -15,28 +15,30 @@
   Various functions to analyze data over a moving window of periods.
 }
 \usage{
-  runSum(x, n=10)
-  runMin(x, n=10)
-  runMax(x, n=10)
-  runMean(x, n=10)
-  runMedian(x, n=10, non.unique="mean")
-  runCov(x, y, n=10, use="all.obs", sample=TRUE)
-  runCor(x, y, n=10, use="all.obs", sample=TRUE)
-  runVar(x, n=10, sample=TRUE)
-  runSD(x, n=10, sample=TRUE)
-  runMAD(x, n=10, center=runMedian(x, n), stat="median",
-         constant=1.4826, non.unique="mean")
+  runSum(x, n=10, cumulative=FALSE)
+  runMin(x, n=10, cumulative=FALSE)
+  runMax(x, n=10, cumulative=FALSE)
+  runMean(x, n=10, cumulative=FALSE)
+  runMedian(x, n=10, non.unique="mean", cumulative=FALSE)
+  runCov(x, y, n=10, use="all.obs", sample=TRUE, cumulative=FALSE)
+  runCor(x, y, n=10, use="all.obs", sample=TRUE, cumulative=FALSE)
+  runVar(x, y=NULL, n=10, sample=TRUE, cumulative=FALSE)
+  runSD(x, n=10, sample=TRUE, cumulative=FALSE)
+  runMAD(x, n=10, center=NULL, stat="median",
+         constant=1.4826, non.unique="mean", cumulative=FALSE)
 }
 \arguments{
   \item{x}{ Object coercible to xts or matrix. }
   \item{y}{ Object coercible to xts or matrix. }
-  \item{n}{ Number of periods to use in the window. }
+  \item{n}{ Number of periods to use in the window or, if \code{cumulative=TRUE},
+    the number of obversations to use before the first result is returned. }
+  \item{cumulative}{ Logical, use from-inception calculation? }
   \item{sample}{ Logical, sample covariance if \code{TRUE} (denominator of \code{n-1}) }
   \item{use}{ Only \code{"all.obs"} currently implemented. }
   \item{non.unique}{ One of 'mean', 'max', or 'min'; which compute their respective
     statistics for the two middle values of even-sized samples. }
   \item{center}{ The values to use as the measure of central tendency, around
-    which to calculate deviations. }
+    which to calculate deviations. The default (\code{NULL}) uses the median. }
   \item{stat}{ Statistic to calculate, one of 'median' or 'mean' (e.g. median
     absolute deviation or mean absolute deviation, respectively.) }
   \item{constant}{ Scale factor applied to approximate the standard deviation. }
@@ -67,7 +69,7 @@
   \item{runSD}{returns standard deviations over a n-period moving window.}
   \item{runMAD}{returns median/mean absolute deviations over a n-period moving window.}
 }
-\author{ Josh Ulrich }
+\author{ Joshua Ulrich }
 %\note{
 %  In \code{growth} you can specify the number of periods and type of compounding
 %  to use when calculating returns of the price series via the \code{'\dots'} argument.

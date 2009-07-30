@@ -18,7 +18,7 @@
 #
 
 "runSum" <-
-function(x, n=10) {
+function(x, n=10, cumulative=FALSE) {
 
   x <- try.xts(x, error=as.matrix)
 
@@ -34,22 +34,29 @@ function(x, n=10) {
 
   # Initialize result vector 
   result <- double(NROW(x))
-  result[(n+beg-1)] <- sum(x[beg:(n+beg-1)])
 
-  # Call Fortran routine
-  result <- .Fortran( "runsum",
-                   ia = as.double(x[beg:NROW(x)]),
-                   lia = as.integer(len),
-                   n = as.integer(n),
-                   oa = as.double(result[beg:NROW(x)]),
-                   loa = as.integer(len),
-                   PACKAGE = "TTR",
-                   DUP = FALSE )$oa
+  if(cumulative) {
+    result[beg:NROW(x)] <- cumsum(x[beg:NROW(x)])
+  } else {
+    result[(n+beg-1)] <- sum(x[beg:(n+beg-1)])
 
-  # Replace 1:(n-1) with NAs and prepend NAs from original data
-  is.na(result) <- c(1:(n-1))
-  result <- c( rep( NA, NAs ), result )
+    # Call Fortran routine
+    result <- .Fortran( "runsum",
+                     ia = as.double(x[beg:NROW(x)]),
+                     lia = as.integer(len),
+                     n = as.integer(n),
+                     oa = as.double(result[beg:NROW(x)]),
+                     loa = as.integer(len),
+                     PACKAGE = "TTR",
+                     DUP = FALSE )$oa
+    
+    # Prepend NAs from original data
+    result <- c( rep( NA, NAs ), result )
+  }
   
+  # Replace 1:(n-1) with NAs
+  is.na(result) <- c(1:(n-1+NAs))
+
   # Convert back to original class
   reclass(result, x)
 }
@@ -91,7 +98,7 @@ function(x, n=10) {
 #-------------------------------------------------------------------------#
 
 "runMin" <-
-function(x, n=10) {
+function(x, n=10, cumulative=FALSE) {
 
   x <- try.xts(x, error=as.matrix)
 
@@ -107,20 +114,27 @@ function(x, n=10) {
 
   # Initialize result vector 
   result <- double(NROW(x))
-  result[(n+beg-1)] <- min(x[beg:(n+beg-1)])
+  
+  if(cumulative) {
+    result[beg:NROW(x)] <- cummin(x[beg:NROW(x)])
+  } else {
+    result[(n+beg-1)] <- min(x[beg:(n+beg-1)])
 
-  result <- .Fortran( "runmin",
-                   ia = as.double(x[beg:NROW(x)]),
-                   lia = as.integer(len),
-                   n = as.integer(n),
-                   oa = as.double(result[beg:NROW(x)]),
-                   loa = as.integer(len),
-                   PACKAGE = "TTR",
-                   DUP = FALSE )$oa
+    result <- .Fortran( "runmin",
+                     ia = as.double(x[beg:NROW(x)]),
+                     lia = as.integer(len),
+                     n = as.integer(n),
+                     oa = as.double(result[beg:NROW(x)]),
+                     loa = as.integer(len),
+                     PACKAGE = "TTR",
+                     DUP = FALSE )$oa
 
-  # Replace 1:(n-1) with NAs and prepend NAs from original data
-  is.na(result) <- c(1:(n-1))
-  result <- c( rep( NA, NAs ), result )
+    # Prepend NAs from original data
+    result <- c( rep( NA, NAs ), result )
+  }
+  
+  # Replace 1:(n-1) with NAs
+  is.na(result) <- c(1:(n-1+NAs))
 
   # Convert back to original class
   reclass(result, x)
@@ -129,7 +143,7 @@ function(x, n=10) {
 #-------------------------------------------------------------------------#
 
 "runMax" <-
-function(x, n=10) {
+function(x, n=10, cumulative=FALSE) {
 
   x <- try.xts(x, error=as.matrix)
   
@@ -145,16 +159,21 @@ function(x, n=10) {
 
   # Initialize result vector 
   result <- double(NROW(x))
-  result[(n+beg-1)] <- max(x[beg:(n+beg-1)])
 
-  result <- .Fortran( "runmax",
-                   ia = as.double(x[beg:NROW(x)]),
-                   lia = as.integer(len),
-                   n = as.integer(n),
-                   oa = as.double(result[beg:NROW(x)]),
-                   loa = as.integer(len),
-                   PACKAGE = "TTR",
-                   DUP = FALSE )$oa
+  if(cumulative) {
+    result[beg:NROW(x)] <- cummax(x[beg:NROW(x)])
+  } else {
+    result[(n+beg-1)] <- max(x[beg:(n+beg-1)])
+
+    result <- .Fortran( "runmax",
+                     ia = as.double(x[beg:NROW(x)]),
+                     lia = as.integer(len),
+                     n = as.integer(n),
+                     oa = as.double(result[beg:NROW(x)]),
+                     loa = as.integer(len),
+                     PACKAGE = "TTR",
+                     DUP = FALSE )$oa
+  }
 
   # Replace 1:(n-1) with NAs and prepend NAs from original data
   is.na(result) <- c(1:(n-1))
@@ -167,9 +186,13 @@ function(x, n=10) {
 #-------------------------------------------------------------------------#
 
 "runMean" <-
-function(x, n=10) {
+function(x, n=10, cumulative=FALSE) {
 
-  result <- runSum(x, n) / n
+  if(cumulative) {
+    result <- runSum(x, n, cumulative) / 1:NROW(x)
+  } else {
+    result <- runSum(x, n) / n
+  }
 
   return(result)
 }
@@ -177,7 +200,7 @@ function(x, n=10) {
 #-------------------------------------------------------------------------#
 
 "runMedian" <-
-function(x, n=10, non.unique="mean") {
+function(x, n=10, non.unique="mean", cumulative=FALSE) {
 
   x <- try.xts(x, error=as.matrix)
 
@@ -202,6 +225,7 @@ function(x, n=10, non.unique="mean") {
                    oa = double(len),
                    la = as.integer(len),
                    ver = as.integer(non.unique),
+                   cu = as.integer(cumulative),
                    PACKAGE = "TTR",
                    DUP = FALSE )$oa
 
@@ -216,7 +240,7 @@ function(x, n=10, non.unique="mean") {
 #-------------------------------------------------------------------------#
 
 "runCov" <-
-function(x, y, n=10, use="all.obs", sample=TRUE) {
+function(x, y, n=10, use="all.obs", sample=TRUE, cumulative=FALSE) {
 
   x <- try.xts(x, error=as.matrix)
   y <- try.xts(y, error=as.matrix)
@@ -240,9 +264,9 @@ function(x, y, n=10, use="all.obs", sample=TRUE) {
   beg <- 1 + NAs
   len <- NROW(xy) - NAs
   
-  xCenter <- runSum(x, n)/n
+  xCenter <- runMean(x, n, cumulative)
   xCenter[1:(NAs+n-1)] <- 0
-  yCenter <- runSum(y, n)/n
+  yCenter <- runMean(y, n, cumulative)
   yCenter[1:(NAs+n-1)] <- 0
 
   # Call Fortran routine
@@ -255,6 +279,7 @@ function(x, y, n=10, use="all.obs", sample=TRUE) {
                    n = as.integer(n),
                    samp = as.integer(sample),
                    oa = double(len),
+                   cu = as.integer(cumulative),
                    PACKAGE = "TTR",
                    DUP = FALSE )$oa
 
@@ -270,10 +295,11 @@ function(x, y, n=10, use="all.obs", sample=TRUE) {
 #-------------------------------------------------------------------------#
 
 "runCor" <-
-function(x, y, n=10, use="all.obs", sample=TRUE) {
+function(x, y, n=10, use="all.obs", sample=TRUE, cumulative=FALSE) {
 
-  result <- runCov(x, y, n, use=use, sample=sample ) /
-            ( runSD(x, n, sample=sample) * runSD(y, n, sample=sample) )
+  result <- runCov(x, y, n, use=use, sample=sample, cumulative) /
+            ( runSD(x, n, sample=sample, cumulative) *
+              runSD(y, n, sample=sample, cumulative) )
 
   return( result )
 }
@@ -281,9 +307,10 @@ function(x, y, n=10, use="all.obs", sample=TRUE) {
 #-------------------------------------------------------------------------#
 
 "runVar" <-
-function(x, n=10, sample=TRUE) {
+function(x, y=NULL, n=10, sample=TRUE, cumulative=FALSE) {
 
-  result <- runCov(x, x, n, use="all.obs", sample=sample)
+  if(is.null(y)) y <- x
+  result <- runCov(x, y, n, use="all.obs", sample=sample, cumulative)
 
   return( result )
 }
@@ -291,9 +318,10 @@ function(x, n=10, sample=TRUE) {
 #-------------------------------------------------------------------------#
 
 "runSD" <-
-function(x, n=10, sample=TRUE) {
+function(x, n=10, sample=TRUE, cumulative=FALSE) {
 
-  result <- sqrt( runCov(x, x, n, use="all.obs", sample=sample) )
+  result <- sqrt( runCov(x, x, n, use="all.obs",
+                  sample=sample, cumulative) )
 
   return( result )
 }
@@ -301,8 +329,8 @@ function(x, n=10, sample=TRUE) {
 #-------------------------------------------------------------------------#
 
 "runMAD" <-
-function(x, n=10, center=runMedian(x, n), stat="median",
-         constant=1.4826, non.unique="mean") {
+function(x, n=10, center=NULL, stat="median",
+         constant=1.4826, non.unique="mean", cumulative=FALSE) {
 
   x <- try.xts(x, error=as.matrix)
 
@@ -315,6 +343,10 @@ function(x, n=10, center=runMedian(x, n), stat="median",
   }
   beg <- 1 + NAs
   len <- NROW(x) - NAs
+  
+  if(is.null(center)) {
+    center <- runMedian(x, n, cumulative=cumulative)
+  }
   center[1:(NAs+n-1)] <- 0
 
   # Mean or Median absolute deviation?
@@ -334,6 +366,7 @@ function(x, n=10, center=runMedian(x, n), stat="median",
                    oa = double(len),                    # output array
                    stat = as.integer(median),           # center statistic
                    ver = as.integer(non.unique),        # median type
+                   cu = as.integer(cumulative),         # from inception
                    PACKAGE = "TTR",
                    DUP = FALSE )$oa
 

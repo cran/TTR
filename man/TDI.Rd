@@ -32,7 +32,7 @@
   \item{ tdi }{ The Trend Detection Index. }
   \item{ di }{ The Direction Indicator. }
 }
-\author{ Josh Ulrich }
+\author{ Joshua Ulrich }
 \references{
   The following site(s) were used to code/document this indicator:\cr
   \url{http://www.linnsoft.com/tour/techind/tdi.htm}\cr
@@ -45,8 +45,8 @@
 }
 \seealso{
   See \code{\link{aroon}}, \code{\link{CCI}}, \code{\link{ADX}},
-  \code{\link{VHF}} for other indicators that measure trend
-  direction/strength.
+  \code{\link{VHF}}, \code{\link{GMMA}} for other indicators that
+  measure trend direction/strength.
 }
 \examples{
   data(ttrc)

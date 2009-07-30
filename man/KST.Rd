@@ -29,7 +29,7 @@
   A object of the same class as \code{price} or a vector (if \code{try.xts}
   fails) containing the Know Sure Thing values.
 }
-\author{ Josh Ulrich }
+\author{ Joshua Ulrich }
 \references{
   The following site(s) were used to code/document this indicator:\cr
   \url{http://www.pring.com/index.html}\cr
@@ -53,5 +53,8 @@
 \examples{
   data(ttrc)
   kst <- KST(ttrc[,"Close"])
+  
+  kst4MA <- KST(ttrc[,"Close"],
+    maType=list(list(SMA),list(EMA),list(DEMA),list(WMA)))
 }
 \keyword{ ts }

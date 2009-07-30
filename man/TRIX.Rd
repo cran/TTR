@@ -28,7 +28,7 @@
   A object of the same class as \code{price} or a vector (if \code{try.xts}
   fails) containing the TRIX values.
 }
-\author{ Josh Ulrich }
+\author{ Joshua Ulrich }
 \references{
   The following site(s) were used to code/document this indicator:\cr
   \url{http://www.fmlabs.com/reference/default.htm?url=TRIX.htm}\cr
@@ -47,6 +47,8 @@
 }
 \examples{
   data(ttrc)
-  trix <- TRIX( ttrc[,"Close"] )
+  trix  <- TRIX(ttrc[,"Close"])
+  trix4 <- TRIX(ttrc[,"Close"],
+    maType=list(list(SMA), list(EMA, wilder=TRUE), list(SMA), list(DEMA)))
 }
 \keyword{ ts }

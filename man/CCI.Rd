@@ -29,7 +29,7 @@
   A object of the same class as \code{HLC} or a vector (if \code{try.xts}
   fails) containing the CCI values.
 }
-\author{ Josh Ulrich }
+\author{ Joshua Ulrich }
 \references{
   The following site(s) were used to code/document this indicator:\cr
   \url{http://www.fmlabs.com/reference/CCI.htm}\cr
@@ -44,8 +44,9 @@
 \seealso{
   See \code{\link{EMA}}, \code{\link{SMA}}, etc. for moving average options;
   and note Warning section.  See \code{\link{aroon}}, \code{\link{ADX}},
-  \code{\link{TDI}}, \code{\link{VHF}} for other indicators that measure trend
-  direction/strength. }
+  \code{\link{TDI}}, \code{\link{VHF}}, \code{\link{GMMA}} for other
+  indicators that measure trend direction/strength.
+}
 \examples{
   data(ttrc)
   cci <- CCI(ttrc[,c("High","Low","Close")])

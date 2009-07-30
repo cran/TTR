@@ -18,7 +18,7 @@
 #
 
 "stoch" <-
-function(HLC, nFastK=14, nFastD=3, nSlowD=3, maType, bounded=TRUE, ...) {
+function(HLC, nFastK=14, nFastD=3, nSlowD=3, maType, bounded=TRUE, smooth=1, ...) {
 
   # Stochastics
 
@@ -53,7 +53,8 @@ function(HLC, nFastK=14, nFastD=3, nSlowD=3, maType, bounded=TRUE, ...) {
     lmin <- runMax(c( low[1], low[-NROW(HLC)]), nFastK)
   }
 
-  fastK <- (close - lmin) / (hmax - lmin)
+  num <- close - lmin
+  den <- hmax - lmin
 
   if(missing(maType)) {
     maType <- 'SMA'
@@ -64,15 +65,29 @@ function(HLC, nFastK=14, nFastD=3, nSlowD=3, maType, bounded=TRUE, ...) {
   #           maType=list(maUp=list(EMA,ratio=1/5), maDown=list(WMA,wts=1:10)) )
   if( is.list(maType) ) {
 
+    # Make sure maType is a list of lists
+    maTypeInfo <- sapply(maType,is.list)
+    if( !(all(maTypeInfo) && length(maTypeInfo) == 3) ) {
+      stop("If \'maType\' is a list, you must specify\n ",
+      "*three* MAs (see Examples section of ?stochastics)")
+    }
+
     # If MA function has 'n' arg, see if it's populated in maType;
     # if it isn't, populate it with function's formal 'n'
-    if( !is.null( formals(maType[[1]])$n ) && is.null( maType[[1]]$n ) ) {
+    if( !is.null( formals(maType[[1]][[1]])$n ) && is.null( maType[[1]]$n ) ) {
       maType[[1]]$n <- nFastD
     }
-    if( !is.null( formals(maType[[2]])$n ) && is.null( maType[[2]]$n ) ) {
+    if( !is.null( formals(maType[[2]][[1]])$n ) && is.null( maType[[2]]$n ) ) {
       maType[[2]]$n <- nSlowD
     }
+    if( !is.null( formals(maType[[3]][[1]])$n ) && is.null( maType[[3]]$n ) ) {
+      maType[[2]]$n <- smooth
+    }
     
+    numMA <- do.call( maType[[3]][[1]], c( list(num), maType[[3]][-1] ) )
+    denMA <- do.call( maType[[3]][[1]], c( list(den), maType[[3]][-1] ) )
+
+    fastK <- num / den
     fastD <- do.call( maType[[1]][[1]], c( list(fastK), maType[[1]][-1] ) )
     slowD <- do.call( maType[[2]][[1]], c( list(fastD), maType[[2]][-1] ) )
   }
@@ -81,6 +96,10 @@ function(HLC, nFastK=14, nFastD=3, nSlowD=3, maType, bounded=TRUE, ...) {
   # e.g. stoch(price, 14, 3, 3, maType="WMA", wts=volume )
   else {
   
+    numMA <- do.call( maType, c( list(num), list(n=smooth) ) )
+    denMA <- do.call( maType, c( list(den), list(n=smooth) ) )
+
+    fastK <- num / den
     fastD <- do.call( maType, c( list(fastK), list(n=nFastD, ...) ) )
     slowD <- do.call( maType, c( list(fastD), list(n=nSlowD, ...) ) )
 
@@ -141,25 +160,32 @@ function(HLC, n=13, nFast=2, nSlow=25, nSig=9, maType, bounded=TRUE, ...) {
   #           maType=list(maUp=list(EMA,ratio=1/5), maDown=list(WMA,wts=1:10)) )
   if( is.list(maType) ) {
 
+    # Make sure maType is a list of lists
+    maTypeInfo <- sapply(maType,is.list)
+    if( !(all(maTypeInfo) && length(maTypeInfo) == 3) ) {
+      stop("If \'maType\' is a list, you must specify\n ",
+      "*three* MAs (see Examples section of ?SMI)")
+    }
+
     # If MA function has 'n' arg, see if it's populated in maType;
     # if it isn't, populate it with function's formal 'n'
-    if( !is.null( formals(maType[[1]])$n ) && is.null( maType[[1]]$n ) ) {
+    if( !is.null( formals(maType[[1]][[1]])$n ) && is.null( maType[[1]]$n ) ) {
       maType[[1]]$n <- nFast
     }
-    if( !is.null( formals(maType[[2]])$n ) && is.null( maType[[2]]$n ) ) {
+    if( !is.null( formals(maType[[2]][[1]])$n ) && is.null( maType[[2]]$n ) ) {
       maType[[2]]$n <- nSlow
     }
-    if( !is.null( formals(maType[[3]])$n ) && is.null( maType[[3]]$n ) ) {
+    if( !is.null( formals(maType[[3]][[1]])$n ) && is.null( maType[[3]]$n ) ) {
       maType[[3]]$n <- nSig
     }
     
-    num1 <- do.call( maType[[1]], c( list(Cdiff ), maType[[1]][-1] ) )
-    den1 <- do.call( maType[[1]], c( list(HLdiff), maType[[1]][-1] ) )
-    num2 <- do.call( maType[[2]], c( list( num1 ), maType[[2]][-1] ) )
-    den2 <- do.call( maType[[2]], c( list( den1 ), maType[[2]][-1] ) )
+    num1 <- do.call( maType[[1]][[1]], c( list(Cdiff ), maType[[1]][-1] ) )
+    den1 <- do.call( maType[[1]][[1]], c( list(HLdiff), maType[[1]][-1] ) )
+    num2 <- do.call( maType[[2]][[1]], c( list( num1 ), maType[[2]][-1] ) )
+    den2 <- do.call( maType[[2]][[1]], c( list( den1 ), maType[[2]][-1] ) )
   
     SMI <- 100 * ( num2 / ( den2 / 2 ) )
-    signal <- do.call( maType[[3]], c( list(SMI), maType[[3]][-1] ) )
+    signal <- do.call( maType[[3]][[1]], c( list(SMI), maType[[3]][-1] ) )
 
   }
   

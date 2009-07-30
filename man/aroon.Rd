@@ -28,7 +28,7 @@
   \item{ aroonDn }{ The Aroon down indicator. }
   \item{ oscillator }{ The Aroon oscillator (\code{aroonUp - aroonDn}). }
 }
-\author{ Josh Ulrich }
+\author{ Joshua Ulrich }
 \references{
   The following site(s) were used to code/document this indicator:\cr
   \url{http://www.fmlabs.com/reference/Aroon.htm}\cr
@@ -45,7 +45,8 @@
   Also, crossovers may be useful.
 }
 \seealso{
-  See \code{\link{CCI}}, \code{\link{ADX}}, \code{\link{TDI}}, and \code{\link{VHF}}
+  See \code{\link{CCI}}, \code{\link{ADX}}, \code{\link{TDI}},
+  \code{\link{VHF}}, \code{\link{GMMA}}
   for other indicators that measure trend direction/strength.
 }
 \examples{

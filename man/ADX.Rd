@@ -27,7 +27,7 @@
   \item{ DX }{ The Direction Index. }
   \item{ ADX }{ The Average Direction Index (trend strength). }
 }
-\author{ Josh Ulrich }
+\author{ Joshua Ulrich }
 \references{
   The following site(s) were used to code/document this indicator:\cr
   \url{http://www.fmlabs.com/reference/DI.htm}\cr
@@ -48,7 +48,8 @@
 \seealso{
   See \code{\link{EMA}}, \code{\link{SMA}}, etc. for moving average options; and note
   Warning section.  The DX calculation uses \code{\link{ATR}}.
-  See \code{\link{aroon}}, \code{\link{CCI}}, \code{\link{TDI}}, \code{\link{VHF}}
+  See \code{\link{aroon}}, \code{\link{CCI}}, \code{\link{TDI}},
+  \code{\link{VHF}}, \code{\link{GMMA}}
   for other indicators that measure trend direction/strength.
 }
 \examples{
