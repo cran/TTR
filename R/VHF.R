@@ -22,7 +22,6 @@ function(price, n=28) {
 
   # Vertical Horizontal Filter
 
-  # http://www.fmlabs.com/reference/VHF.htm
   # http://www.equis.com/Customer/Resources/TAAZ?c=3&p=119
 
   price <- try.xts(price, error=as.matrix)
@@ -46,7 +45,7 @@ function(price, n=28) {
   # Find highest max, and lowest min of price series
   hmax  <- runMax( high, n)
   lmin  <- runMin(  low, n)
-  denom <- momentum(close, n=1, na.pad=TRUE)
+  denom <- abs( momentum(close, n=1, na.pad=TRUE) )
 
   VHF <- ( hmax - lmin ) / runSum(denom, n)
 
