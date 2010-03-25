@@ -1,7 +1,7 @@
 #
 #   TTR: Technical Trading Rules
 #
-#   Copyright (C) 2007-2008  Joshua M. Ulrich
+#   Copyright (C) 2007-2010  Joshua M. Ulrich
 #
 #   This program is free software: you can redistribute it and/or modify
 #   it under the terms of the GNU General Public License as published by
@@ -45,14 +45,17 @@ function (x, n=10, wilder=FALSE, ratio=NULL) {
   # http://stockcharts.com/education/IndicatorAnalysis/indic_movingAvg.html
 
   x <- try.xts(x, error=as.matrix)
-  
-  # Count NAs, ensure they're only at beginning of data, then remove.
-  # Avoid na.omit() because it will cause problems for reclass()
-  x.na <- naCheck(x, n)
+  if( n < 1 || n > NROW(x) )
+    stop("Invalid 'n'")
 
-  # Initialize ma vector
-  ma <- rep(1, NROW(x))
-  ma[x.na$beg] <- mean(x[x.na$nonNA[1]:x.na$beg])
+  # Check for non-leading NAs
+  # Leading NAs are handled in the C code
+  x.na <- xts:::naCheck(x, n)
+  
+  # If ratio is specified, and n is not, set n to approx 'correct'
+  # value backed out from ratio
+  if(missing(n) && !missing(ratio))
+    n <- trunc(2/ratio - 1)
 
   # Determine decay ratio
   if(is.null(ratio)) {
@@ -60,33 +63,28 @@ function (x, n=10, wilder=FALSE, ratio=NULL) {
     else       ratio <- 2/(n+1)
   }
 
-  # Call Fortran routine
-  ma <- .Fortran( "ema", ia = as.double(x[x.na$nonNA]),
-                         lia = as.integer(NROW(x.na$nonNA)),
-                         n = as.integer(n),
-                         oa = as.double(ma[x.na$nonNA]),
-                         loa = as.integer(NROW(x.na$nonNA)),
-                         ratio = as.double(ratio),
-                         PACKAGE = "TTR",
-                         DUP = FALSE )$oa
+  # Call C routine
+  ma <- .Call("ema", x, n, ratio, PACKAGE = "TTR")
 
-  # Replace 1:(n-1) with NAs and prepend NAs from original data
-  is.na(ma) <- c(1:(n-1))
-  ma <- c( rep( NA, x.na$NAs ), ma ) 
-  
   reclass(ma, x)
 }
 
 #-------------------------------------------------------------------------#
 
 "DEMA" <-
-function(x, n=10) {
+function(x, n=10, v=1) {
 
   # Double Exponential Moving Average
+  # Thanks to John Gavin for the v-factor generalization
 
   # http://www.fmlabs.com/reference/DEMA.htm
+  # http://www.fmlabs.com/reference/T3.htm
 
-  dema <- 2 * EMA(x,n) - EMA(EMA(x,n),n)
+  if(v < 0 || v > 1) {
+    stop("Please ensure 0 <= v <= 1")
+  }
+
+  dema <- (1 + v) * EMA(x,n) - EMA(EMA(x,n),n) * v
 
   return( dema )
 }
@@ -169,44 +167,16 @@ function(price, volume, n=10) {
   if( n < 1 || n > NROW(price) )
     stop("Invalid 'n'")
 
-  # Count NAs, ensure they're only at beginning of data, then remove.
-  NAp <- sum( is.na(price) )
-  NAv <- sum( is.na(volume) )
-  NAs <- max( NAp, NAv )
-  if( NAs > 0 ) {
-    if( any( is.na( price[-(1:NAp)]) ) )
-      stop("'price' contains non-leading NAs")
-    if( any( is.na(volume[-(1:NAv)]) ) )
-      stop("'volume' contains non-leading NAs")
-  }
-  pv <- na.omit( cbind(price, volume) )
+  pv <- cbind(price, volume)
 
-  # Initialize ma vector 
-  ma <- rep(0, NROW(pv))
-  ma[n] <- pv[n,1]
+  # Check for non-leading NAs
+  # Leading NAs are handled in the C code
+  pv.na <- xts:::naCheck(pv, n)
 
-  if(NROW(volume)==1) {
-    vSum <- rep(volume, NROW(pv))
-  } else {
-    vSum <- runSum(pv[,2], n)
-    vSum[1:(n-1)] <- pv[1:(n-1),2]
-  }
+  # Call C routine
+  ma <- .Call("evwma", pv[,1], pv[,2], n, PACKAGE = "TTR")
 
-  # Call Fortran routine
-  ma <- .Fortran( "evwma", ip = as.double(pv[,1]),
-                           iv = as.double(pv[,2]),
-                           ivs = as.double(vSum),
-                           lia = as.integer(NROW(pv)),
-                           n = as.integer(n),
-                           oa = as.double(ma),
-                           loa = as.integer(NROW(ma)),
-                           PACKAGE = "TTR",
-                           DUP = FALSE )$oa
-
-  # replace 1:(n-1) with NAs and prepend NAs from original data
-  ma[1:(n-1)] <- NA
-  ma <- c( rep( NA, max( NAp, NAv ) ), ma )
-
+  # Convert back to original class
   reclass(ma, price)
 }
 
@@ -255,3 +225,17 @@ function (x, n=10, ratio=NULL) {
   
   reclass(ma, x)
 }
+
+#-------------------------------------------------------------------------#
+
+"VWAP" <- "VWMA" <-
+function(price, volume, n=10) {
+
+  # Volume-weighted average price
+  # Volume-weighted moving average
+
+  res <- WMA(price, n=n, volume)
+  return(res)
+
+}
+
