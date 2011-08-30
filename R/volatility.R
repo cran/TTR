@@ -1,7 +1,7 @@
 #
 #   TTR: Technical Trading Rules
 #
-#   Copyright (C) 2007-2010  Joshua M. Ulrich
+#   Copyright (C) 2007-2011  Joshua M. Ulrich
 #
 #   This program is free software: you can redistribute it and/or modify
 #   it under the terms of the GNU General Public License as published by
@@ -42,8 +42,7 @@ function(OHLC, n=10, calc="close", N=260, ...) {
     } else {
       r <- ROC(OHLC[, 4], 1, ...)
     }
-    rBar <- runSum( r, n-1 ) / (n-1)
-    s <- sqrt( N/(n-2) * runSum( (r-rBar)^2 , n-1 ) )
+    s <- sqrt(N) * runSD(r , n-1)
   }
 
   # Historical Open-High-Low-Close Volatility: Garman Klass

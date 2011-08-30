@@ -10,6 +10,7 @@
 \alias{ZLEMA}
 \alias{VWAP}
 \alias{VWMA}
+\alias{VMA}
 \alias{MA}
 \title{ Moving Averages }
 \description{
@@ -19,11 +20,12 @@
   SMA(x, n=10)
   EMA(x, n=10, wilder=FALSE, ratio=NULL)
   WMA(x, n=10, wts=1:n)
- DEMA(x, n=10, v=1)
+ DEMA(x, n=10, v=1, wilder=FALSE, ratio=NULL)
 EVWMA(price, volume, n=10)
 ZLEMA(x, n=10, ratio=NULL)
  VWMA(price, volume, n=10)
  VWAP(price, volume, n=10)
+  VMA(x, w, ratio=1)
 }
 \arguments{
   \item{x}{ Price, volume, etc. series that is coercible to xts or matrix. }
@@ -32,11 +34,13 @@ ZLEMA(x, n=10, ratio=NULL)
     corresponds to price series, or a constant.  See Notes. }
   \item{n}{ Number of periods to average over. }
   \item{v}{ The 'volume factor' (a number in [0,1]).  See Notes. }
+  \item{w}{ Vector of weights (in [0,1]) the same length as \code{x}. }
   \item{wts}{ Vector of weights.  Length of \code{wts} vector must equal the
     length of \code{x}, or \code{n} (the default). }
   \item{wilder}{ logical; if \code{TRUE}, a Welles Wilder type EMA will be
     calculated; see notes. }
-  \item{ratio}{ A smoothing/decay ratio to use (overrides \code{wilder} in EMA) }
+  \item{ratio}{ A smoothing/decay ratio.  \code{ratio} overrides \code{wilder}
+    in \code{EMA}, and provides additional smoothing in \code{VMA}. }
 }
 \details{
   \code{SMA} calculates the arithmetic mean of the series over the past \code{n} observations.
@@ -48,7 +52,8 @@ ZLEMA(x, n=10, ratio=NULL)
   \code{n}.  If the length of \code{wts} is equal to the length of \code{x}, the WMA will
   use the values of \code{wts} as weights.
 
-  \code{DEMA} is calculated as: \code{DEMA = (1 + v) * EMA(x,n) - EMA(EMA(x,n),n) * v}.
+  \code{DEMA} is calculated as: \code{DEMA = (1 + v) * EMA(x,n) - EMA(EMA(x,n),n) * v}
+  (with the corresponding \code{wilder} and \code{ratio} arguments).
 
   \code{EVWMA} uses volume to define the period of the MA.
 
@@ -57,6 +62,10 @@ ZLEMA(x, n=10, ratio=NULL)
   the cumulative effect.
   
   \code{VWMA} and \code{VWAP} calculate the volume-weighted moving average price.
+  
+  \code{VMA} calculate a variable-length moving average based on the absolute 
+  value of \code{w}.  Higher (lower) values of \code{w} will cause \code{VMA}
+  to react faster (slower).
 }
 \value{
   A object of the same class as \code{x} or \code{price} or a vector
@@ -69,6 +78,7 @@ ZLEMA(x, n=10, ratio=NULL)
   \item{ZLEMA}{ Zero lag exponential moving average. }
   \item{VWMA}{ Volume-weighed moving average (same as \code{VWAP}). }
   \item{VWAP}{ Volume-weighed average price (same as \code{VWMA}). }
+  \item{VWA}{ Variable-length moving average. }
 }
 \author{ Joshua Ulrich }
 \references{
@@ -79,6 +89,7 @@ ZLEMA(x, n=10, ratio=NULL)
   \url{http://www.fmlabs.com/reference/T3.htm}\cr
   \url{http://linnsoft.com/tour/techind/evwma.htm}\cr
   \url{http://www.fmlabs.com/reference/ZeroLagExpMA.htm}\cr
+  \url{http://www.fmlabs.com/reference/VIDYA.htm}\cr
 }
 \note{ 
   For \code{EMA}, \code{wilder=FALSE} (the default) uses an exponential smoothing ratio of 
