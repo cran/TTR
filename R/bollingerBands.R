@@ -1,7 +1,7 @@
 #
 #   TTR: Technical Trading Rules
 #
-#   Copyright (C) 2007-2010  Joshua M. Ulrich
+#   Copyright (C) 2007-2011  Joshua M. Ulrich
 #
 #   This program is free software: you can redistribute it and/or modify
 #   it under the terms of the GNU General Public License as published by
@@ -53,7 +53,7 @@ function(HLC, n=20, maType, sd=2, ...) {
   mavg  <- do.call( maType, c( list(HLC), maArgs ) )
 
   # Calculate standard deviation by hand to incorporate various MAs
-  sdev   <- runSD(HLC, n)
+  sdev   <- runSD(HLC, n, sample=FALSE)
 
   up     <- mavg + sd * sdev
   dn     <- mavg - sd * sdev

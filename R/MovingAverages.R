@@ -1,7 +1,7 @@
 #
 #   TTR: Technical Trading Rules
 #
-#   Copyright (C) 2007-2010  Joshua M. Ulrich
+#   Copyright (C) 2007-2011  Joshua M. Ulrich
 #
 #   This program is free software: you can redistribute it and/or modify
 #   it under the terms of the GNU General Public License as published by
@@ -72,7 +72,7 @@ function (x, n=10, wilder=FALSE, ratio=NULL) {
 #-------------------------------------------------------------------------#
 
 "DEMA" <-
-function(x, n=10, v=1) {
+function(x, n=10, v=1, wilder=FALSE, ratio=NULL) {
 
   # Double Exponential Moving Average
   # Thanks to John Gavin for the v-factor generalization
@@ -84,7 +84,8 @@ function(x, n=10, v=1) {
     stop("Please ensure 0 <= v <= 1")
   }
 
-  dema <- (1 + v) * EMA(x,n) - EMA(EMA(x,n),n) * v
+  dema <- (1 + v) * EMA(x,n,wilder,ratio) -
+    EMA(EMA(x,n,wilder,ratio),n,wilder,ratio) * v
 
   return( dema )
 }
@@ -206,7 +207,7 @@ function (x, n=10, ratio=NULL) {
 
   # Determine decay ratio
   if(is.null(ratio)) {
-    ratio <- 2/(n-1)
+    ratio <- 2/(n+1)
   }
 
   # Call Fortran routine
@@ -237,5 +238,31 @@ function(price, volume, n=10) {
   res <- WMA(price, n=n, volume)
   return(res)
 
+}
+
+#-------------------------------------------------------------------------#
+
+"VMA" <-
+function (x, w, ratio=1) {
+
+  # Variable Moving Average
+
+  # http://www.fmlabs.com/reference/default.htm?url=vidya.htm
+
+  x <- try.xts(x, error=as.matrix)
+  w <- try.xts(w, error=as.matrix)
+
+  if( NROW(w) != NROW(x) )
+    stop("Length of 'w' must equal the length of 'x'")
+
+  # Check for non-leading NAs
+  # Leading NAs are handled in the C code
+  x.na <- xts:::naCheck(x, 1)
+  w.na <- xts:::naCheck(w, 1)
+  
+  # Call C routine
+  ma <- .Call("vma", x, abs(w), ratio, PACKAGE = "TTR")
+
+  reclass(ma, x)
 }
 
