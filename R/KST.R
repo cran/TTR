@@ -1,7 +1,7 @@
 #
 #   TTR: Technical Trading Rules
 #
-#   Copyright (C) 2007-2011  Joshua M. Ulrich
+#   Copyright (C) 2007-2012  Joshua M. Ulrich
 #
 #   This program is free software: you can redistribute it and/or modify
 #   it under the terms of the GNU General Public License as published by
@@ -89,7 +89,7 @@ function(price, n=c(10,10,10,15), nROC=c(10,15,20,30), nSig=9,
   }
 
   if(is.xts(ret)) {
-    kst <- xts(rowSums(ret),index(ret))
+    kst <- xts(100 * rowSums(ret),index(ret))
   } else {
     kst <- 100 * rowSums(ret)
   }
