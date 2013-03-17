@@ -1,11 +1,11 @@
 #
 #   TTR: Technical Trading Rules
 #
-#   Copyright (C) 2007-2012  Joshua M. Ulrich
+#   Copyright (C) 2007-2013  Joshua M. Ulrich
 #
 #   This program is free software: you can redistribute it and/or modify
 #   it under the terms of the GNU General Public License as published by
-#   the Free Software Foundation, either version 3 of the License, or
+#   the Free Software Foundation, either version 2 of the License, or
 #   (at your option) any later version.
 #
 #   This program is distributed in the hope that it will be useful,
@@ -17,15 +17,57 @@
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 
+#'Triple Smoothed Exponential Oscillator
+#'
+#'The TRIX indicator calculates the rate of change of a triple exponential
+#'moving average.  Developed by Jack K. Hutson.
+#'
+#'The TRIX is calculated as follows:\cr 3MA = \code{MA}( \code{MA}(
+#'\code{MA}(\code{price}) ) )\cr trix = 100 * [ 3MA(t) / 3MA(t-1) - 1 ]
+#'
+#'@param price Price series that is coercible to xts or matrix.
+#'@param n Number of periods for moving average.
+#'@param nSig Number of periods for signal line moving average.
+#'@param maType Either:
+#' \enumerate{
+#'   \item A function or a string naming the function to be called.
+#'   \item A \emph{list} with the first component like (1) above, and
+#'     additional parameters specified as \emph{named} components.
+#'     See Examples.
+#' }
+#'@param percent logical; if \code{TRUE}, the rate of change is calculated
+#'using the \code{ROC} function, otherwise the \code{momentum} function is
+#'used.
+#'@param \dots Other arguments to be passed to the \code{maType} function in
+#'case (1) above.
+#'@return A object of the same class as \code{price} or a vector (if
+#'\code{try.xts} fails) containing the TRIX values.
+#'@note Buy/sell signals are generated when the TRIX crosses above/below zero.
+#'A nine-period EMA of the TRIX is used as a default signal line.  Buy/sell
+#'signals are generated when the TRIX crosses above/below the signal line and
+#'is also above/below zero.
+#'@author Joshua Ulrich
+#'@seealso See \code{\link{EMA}}, \code{\link{SMA}}, etc. for moving average
+#'options; and note Warning section.
+#'@references The following site(s) were used to code/document this
+#'indicator:\cr
+#'\url{http://www.fmlabs.com/reference/default.htm?url=TRIX.htm}\cr
+#'\url{http://www.equis.com/Customer/Resources/TAAZ/?c=3&p=114}\cr
+#'\url{http://www.linnsoft.com/tour/techind/trix.htm}\cr
+#'\url{http://stockcharts.com/education/IndicatorAnalysis/indic_trix.htm}\cr
+#'@keywords ts
+#'@examples
+#'
+#' data(ttrc)
+#' trix  <- TRIX(ttrc[,"Close"])
+#' trix4 <- TRIX(ttrc[,"Close"],
+#' maType=list(list(SMA), list(EMA, wilder=TRUE), list(SMA), list(DEMA)))
+#'
+#'@export
 "TRIX" <-
 function(price, n=20, nSig=9, maType, percent=TRUE, ...) {
 
   # Triple Smoothed Exponential Oscillator
-
-  # http://www.fmlabs.com/reference/default.htm?url=TRIX.htm
-  # http://www.equis.com/Customer/Resources/TAAZ/?c=3&p=114
-  # http://www.linnsoft.com/tour/techind/trix.htm
-  # http://stockcharts.com/education/IndicatorAnalysis/indic_trix.htm
 
   # Default MA
   if(missing(maType)) {

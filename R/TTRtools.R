@@ -1,11 +1,11 @@
 #
 #   TTR: Technical Trading Rules
 #
-#   Copyright (C) 2007-2012  Joshua M. Ulrich
+#   Copyright (C) 2007-2013  Joshua M. Ulrich
 #
 #   This program is free software: you can redistribute it and/or modify
 #   it under the terms of the GNU General Public License as published by
-#   the Free Software Foundation, either version 3 of the License, or
+#   the Free Software Foundation, either version 2 of the License, or
 #   (at your option) any later version.
 #
 #   This program is distributed in the hope that it will be useful,
@@ -17,17 +17,46 @@
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 
+#'Miscellaneous Tools
+#'
+#'Various functions that may be useful in designing technical trading rules.
+#'
+#'\code{growth} calculates the growth of an investment using given prices and
+#'signals.
+#'
+#'\code{lags} calculates the lags of a given series.
+#'
+#'@aliases growth lags
+#'@param price Price series that is coercible to xts or matrix.
+#'@param signals Signals to use (defaults to vector of ones).  Use '0' for no
+#'position, '1' for long position, and '-1' for short position.
+#'@param x Object that is coercible to xts or matrix.
+#'@param n Number of periods to use.
+#'@param \dots Further arguments to be passed from or to other methods.
+#'@return \code{growth} returns a vector of the growth of the investment.
+#'
+#'\code{lags} returns a matrix of lagged values of the original vector.
+#'
+#'@note In \code{growth} you can specify the number of periods and type of
+#'compounding to use when calculating returns of the price series via the
+#'\code{'\dots'} argument.
+#'@author Joshua Ulrich
+#'@keywords ts
+#'@rdname TTRtools
+#'@export
 "lags" <-
 function(x, n=1) {
+
+  #.Deprecated(c("xts::lag.xts","quantmod::Lag"),"TTR")
 
   # Calculate lags of a series
 
   x <- as.matrix(x)
   if( is.null(colnames(x)) ) colnames(x) <- paste("V",1:NCOL(x),sep="")
 
-  out <- embed(x, lag+1)
-  if(lag==1)     lag.names <- 1      else
-  if(NCOL(x)==1) lag.names <- 1:lag  else  lag.names <- rep(1:lag,NCOL(x))
+  out <- embed(x, n+1)
+  if(n==1)       lag.names <- 1    else
+  if(NCOL(x)==1) lag.names <- 1:n  else  lag.names <- rep(1:n,NCOL(x))
 
   colnames(out) <- c( colnames(x), paste(colnames(x), sort(lag.names), sep=".") )
 
@@ -35,6 +64,8 @@ function(x, n=1) {
 }
 
 #-------------------------------------------------------------------------#
+#'@rdname TTRtools
+#'@export
 "growth" <-
 function(price, signals, ...) {
 
@@ -53,6 +84,8 @@ function(price, signals, ...) {
 
 #-------------------------------------------------------------------------#
 
+#'@rdname TTRtools
+#'@export
 'naCheck' <-
 function(x, n=0) {
 

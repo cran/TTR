@@ -1,11 +1,11 @@
 #
 #   TTR: Technical Trading Rules
 #
-#   Copyright (C) 2007-2012  Joshua M. Ulrich
+#   Copyright (C) 2007-2013  Joshua M. Ulrich
 #
 #   This program is free software: you can redistribute it and/or modify
 #   it under the terms of the GNU General Public License as published by
-#   the Free Software Foundation, either version 3 of the License, or
+#   the Free Software Foundation, either version 2 of the License, or
 #   (at your option) any later version.
 #
 #   This program is distributed in the hope that it will be useful,
@@ -17,17 +17,50 @@
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 
+#'Zig Zag
+#'
+#'Zig Zag higlights trends by removing price changes smaller than \code{change}
+#'and interpolating lines between the extreme points.
+#'
+#'The Zig Zag is non-predictive.  The purpose of the Zig Zag is filter noise
+#'and make chart patterns clearer.  It's more a visual tool than an indicator.
+#'
+#'@aliases ZigZag zigzag
+#'@param HL Object that is coercible to xts or matrix and contains either a
+#'High-Low price series, or a Close price series.
+#'@param change Minimum price movement, either in dollars or percent (see
+#'\code{percent}).
+#'@param percent Use percentage or dollar change?
+#'@param retrace Is \code{change} a retracement of the previous move, or an
+#'absolute change from peak to trough?
+#'@param lastExtreme If the extreme price is the same over multiple periods,
+#'should the extreme price be the first or last observation?
+#'@return A object of the same class as \code{HL} or a vector (if
+#'\code{try.xts} fails) containing the Zig Zag indicator.
+#'@note If High-Low prices are given, the function calculates the max/min using
+#'the high/low prices.  Otherwise the function calculates the max/min of the
+#'single series.
+#'@author Joshua Ulrich
+#'@references The following site(s) were used to code/document this
+#'indicator:\cr
+#'\url{http://www.fmlabs.com/reference/default.htm?url=ZigZag.htm}\cr
+#'\url{http://www.linnsoft.com/tour/techind/zigzag.htm}\cr
+#'\url{http://www.linnsoft.com/tour/techind/zigosc.htm}\cr
+#'\url{http://www.equis.com/Customer/Resources/TAAZ/?c=3&p=127}\cr
+#'\url{http://stockcharts.com/school/doku.php?id=chart_school:technical_indicators:zigzag}\cr
+#'@keywords ts
+#'@examples
+#'
+#' ## Get Data and Indicator ##
+#' data(ttrc)
+#' zz <- ZigZag( ttrc[,c("High", "Low")], change=20 )
+#'
+#'@export
 "ZigZag" <- 
 function( HL, change=10, percent=TRUE, retrace=FALSE, lastExtreme=TRUE ) {
 
   # Zig Zag Indicator
   # Adapted from Alberto Santini's code
-
-  # http://www.fmlabs.com/reference/default.htm?url=ZigZag.htm
-  # http://www.linnsoft.com/tour/techind/zigzag.htm
-  # http://www.linnsoft.com/tour/techind/zigosc.htm
-  # http://www.equis.com/Customer/Resources/TAAZ/?c=3&p=127
-  # http://stockcharts.com/school/doku.php?id=chart_school:technical_indicators:zigzag
 
   HL <- try.xts(HL, error=as.matrix)
   HL.na <- naCheck(HL,0)
