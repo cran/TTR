@@ -1,11 +1,11 @@
 /*
  *  TTR: Technical Trading Rules
  *
- *  Copyright (C) 2007-2012  Joshua M. Ulrich
+ *  Copyright (C) 2007-2013  Joshua M. Ulrich
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation, either version 3 of the License, or
+ *  the Free Software Foundation, either version 2 of the License, or
  *  (at your option) any later version.
  *
  *  This program is distributed in the hope that it will be useful,
@@ -20,7 +20,7 @@
 #include <R.h>
 #include <Rinternals.h>
 
-SEXP sar (SEXP hi, SEXP lo, SEXP xl) {
+SEXP sar (SEXP hi, SEXP lo, SEXP xl, SEXP ig) {
 
     /* Initalize loop and PROTECT counters */
     int i, P=0;
@@ -35,6 +35,7 @@ SEXP sar (SEXP hi, SEXP lo, SEXP xl) {
     if(TYPEOF(xl) != REALSXP) {
       PROTECT(xl = coerceVector(xl, REALSXP)); P++;
     }
+    double initGap = asReal(ig);
 
     /* Pointers to function arguments */
     double *d_hi = REAL(hi);
@@ -64,7 +65,7 @@ SEXP sar (SEXP hi, SEXP lo, SEXP xl) {
     double xpt0 = d_hi[beg-1], xpt1 = 0;
     double af0 = d_xl[0], af1 = 0;
     double lmin, lmax;
-    d_sar[beg-1] = d_lo[beg-1]-0.01;
+    d_sar[beg-1] = d_lo[beg-1]-initGap;
 
     for(i=beg; i < nr; i++) {
       /* Increment signal, extreme point, and acceleration factor */
@@ -73,25 +74,16 @@ SEXP sar (SEXP hi, SEXP lo, SEXP xl) {
       af1 = af0;
 
       /* Local extrema */
-      lmin = (d_lo[i-1] < d_lo[i]) ? d_lo[i-1] : d_lo[i];
-      lmax = (d_hi[i-1] > d_hi[i]) ? d_hi[i-1] : d_hi[i];
+      lmin = fmin(d_lo[i-1], d_lo[i]);
+      lmax = fmax(d_hi[i-1], d_hi[i]);
 
-      /*
-       * Create signal and extreme price vectors
-       */
-
-      /* Previous buy signal */
-      if( sig1 == 1 ) {
-
-        sig0 = (d_lo[i] > d_sar[i-1]) ? 1 : -1;   /* New signal */
-        xpt0 = (d_hi[i] > xpt1) ? d_hi[i] : xpt1; /* New extreme price */
-
-      /* Previous sell signal */
-      } else {
-
-        sig0 = (d_hi[i] < d_sar[i-1]) ? -1 : 1;   /* New signal */
-        xpt0 = (d_lo[i] < xpt1) ? d_lo[i] : xpt1; /* New extreme price */
-
+      /* Create signal and extreme price vectors */
+      if( sig1 == 1 ) {  /* Previous buy signal */
+        sig0 = (d_lo[i] > d_sar[i-1]) ? 1 : -1;  /* New signal */
+        xpt0 = fmax(lmax, xpt1);                 /* New extreme price */
+      } else {           /* Previous sell signal */
+        sig0 = (d_hi[i] < d_sar[i-1]) ? -1 : 1;  /* New signal */
+        xpt0 = fmin(lmin, xpt1);                 /* New extreme price */
       }
 
       /*
@@ -101,44 +93,24 @@ SEXP sar (SEXP hi, SEXP lo, SEXP xl) {
 
       /* No signal change */
       if( sig0 == sig1 ) {
-
+        /* Initial calculations */
         d_sar[i] = d_sar[i-1] + ( xpt1 - d_sar[i-1] ) * af1;
-
+        af0 = (af1 == d_xl[1]) ? d_xl[1] : (d_xl[0] + af1);
         /* Current buy signal */
         if( sig0 == 1 ) {
-
-          /* Determine new acceleration factor vector value */
-          if( xpt0 > xpt1 ) {
-            af0 = (af1 == d_xl[1]) ? d_xl[1] : (d_xl[0] + af1);
-          } else {
-            af0 = af1;
-          }
-
-          /* Determine sar vector value */
-          if( d_sar[i] > lmin ) {
-            d_sar[i] = lmin;
-          }
-
-        /* Current sell signal */
-        } else {
-
-          /* Determine new acceleration factor vector value */
-          if( xpt0 < xpt1 ) {
-            af0 = (af1 == d_xl[1]) ? d_xl[1] : (d_xl[0] + af1);
-          } else {
-            af0 = af1;
-          }
-
-          /* Determine sar vector value */
-          if( d_sar[i] < lmax ) {
-            d_sar[i] = lmax;
-          }
+          af0 = (xpt0 > xpt1) ? af0 : af1;  /* Update acceleration factor */
+          d_sar[i] = fmin(d_sar[i],lmin);   /* Determine sar value */
         }
-
+        /* Current sell signal */
+        else {
+          af0 = (xpt0 < xpt1) ? af0 : af1;  /* Update acceleration factor */
+          d_sar[i] = fmax(d_sar[i],lmax);   /* Determine sar value */
+        }
+      }
       /* New signal */
-      } else {
-        af0 = d_xl[0];
-        d_sar[i] = xpt1;
+      else {
+        af0 = d_xl[0];    /* reset acceleration factor */
+        d_sar[i] = xpt0;  /* set sar value */
       }
     }
     

@@ -1,11 +1,11 @@
 /*
  *  TTR: Technical Trading Rules
  *
- *  Copyright (C) 2007-2012  Joshua M. Ulrich
+ *  Copyright (C) 2007-2013  Joshua M. Ulrich
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation, either version 3 of the License, or
+ *  the Free Software Foundation, either version 2 of the License, or
  *  (at your option) any later version.
  *
  *  This program is distributed in the hope that it will be useful,
@@ -17,77 +17,84 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <R.h>
-#include <Rinternals.h>
+/*#include <R.h>
+#include <Rinternals.h>*/
+#include <xtsAPI.h>    		/* xts exported functions */
+//#include <xts.h>    		/* xts exported functions */
 
-SEXP aroon (SEXP hi, SEXP lo, SEXP n) {
+SEXP aroon_max (SEXP x, SEXP n) {
 
-    /* Initalize loop and PROTECT counters */
-    int i, P=0;
+  /* Initalize loop, loc, and PROTECT counters */
+  int i, j, loc=0, P=0;
 
-    /* Ensure High and Low arguments are double */
-    if(TYPEOF(hi) != REALSXP) {
-      PROTECT(hi = coerceVector(hi, REALSXP)); P++;
-    }
-    if(TYPEOF(lo) != REALSXP) {
-      PROTECT(lo = coerceVector(lo, REALSXP)); P++;
-    }
-    /* Ensure 'n' is integer */
-    if(TYPEOF(n) != INTSXP) {
-      PROTECT(n = coerceVector(n, INTSXP)); P++;
-    }
+  /* Ensure x argument is double */
+  if(TYPEOF(x) != REALSXP) {
+    PROTECT(x = coerceVector(x, REALSXP)); P++;
+  }
 
-    /* Pointers to function arguments */
-    double *d_hi = REAL(hi);
-    double *d_lo = REAL(lo);
-    int *i_n = INTEGER(n);
+  /* Pointers to function arguments */
+  double *real_x = REAL(x);
+  int int_n = asInteger(n);
 
-    /* Input object length */
-    int nr = nrows(hi);
+  /* Input object length */
+  int nr = length(x);
 
-    /* Initalize result R objects */
-    SEXP result; PROTECT(result = allocVector(VECSXP,  2)); P++;
-    SEXP up;     PROTECT(up     = allocVector(REALSXP,nr)); P++;
-    SEXP dn;     PROTECT(dn     = allocVector(REALSXP,nr)); P++;
+  /* Initalize result R object */
+  SEXP result;
+  PROTECT(result = allocVector(REALSXP, nr)); P++;
+  double *real_result = REAL(result);
 
-    /* Initialize REAL pointers to R result objects */
-    double *d_up = REAL(up);
-    double *d_dn = REAL(dn);
+  /* check for non-leading NAs and get first non-NA location */
+  SEXP first;
+  //PROTECT(first = naCheck(x, ScalarLogical(TRUE))); P++; // xts.h
+  PROTECT(first = xtsNaCheck(x, ScalarLogical(TRUE))); P++; // xtsAPI.h
+  int int_first = asInteger(first);
+  if(int_n + 1 + int_first > nr)
+    error("not enough non-NA values");
 
-    /* Find first non-NA value */
-/*    int beg = 1;
-    for(i=0; i < nr; i++) {
-      if( ISNA(d_hi[i]) || ISNA(d_lo[i]) ) {
-        d_sar[i] = NA_REAL;
-        beg++;
+  double real_max = real_x[0];
+
+  /* This portion is a modified version of roll_max from xts/zoo */
+  for(i=0; i<nr; i++) {
+    /* set leading NAs and find initial max value */
+    //if(i < int_first + int_n - 1) {  // roll_max
+    if(i < int_first + int_n) {
+      real_result[i] = NA_REAL;
+      if(real_x[i] >= real_max) {
+        real_max = real_x[i];  /* set max value */
+        loc = 0;               /* set max location in window */
+      }
+      loc++;
+      continue;
+    } else {
+      /* if the max leaves the window */
+      //if(loc >= int_n-1) {  // roll_max
+      if(loc > int_n) {
+        /* find the max over the (n+1) window */
+        real_max = real_x[i];
+        loc = 0;
+        //for(j=0; j<int_n; j++) {  // roll_max
+        for(j=1; j<int_n+1; j++) {
+          if(real_x[i-j] > real_max) {
+            real_max = real_x[i-j];
+            loc = j;
+          }
+        }
       } else {
-        break;
+        /* if the new value is the new max */
+        if(real_x[i] >= real_max) {
+          real_max = real_x[i];
+          loc = 0;
+        }
       }
     }
-*/
-    /* Initialize values needed by the routine */
-/*    int sig0 = 1, sig1 = 0;
-    double xpt0 = d_hi[beg-1], xpt1 = 0;
-    double af0 = d_xl[0], af1 = 0;
-    double lmin, lmax;
-    d_sar[beg-1] = d_lo[beg-1]-0.01;
+    /* set result, increment location */
+    real_result[i] = (100.0 * (int_n - loc)) / int_n;
+    loc++;
+  }
 
-    for(i=beg; i < nr; i++) {
-*/      /* Increment signal, extreme point, and acceleration factor */
-/*      sig1 = sig0;
-      xpt1 = xpt0;
-      af1 = af0;
-*/
-      /* Local extrema */
-/*      lmin = (d_lo[i-1] < d_lo[i]) ? d_lo[i-1] : d_lo[i];
-      lmax = (d_hi[i-1] > d_hi[i]) ? d_hi[i-1] : d_hi[i];
-*/
-    /* Assign results to list */
-    SET_VECTOR_ELT(result, 0, up);
-    SET_VECTOR_ELT(result, 1, dn);
-
-    /* UNPROTECT R objects and return result */
-    UNPROTECT(P);
-    return(result);
+  /* UNPROTECT R objects and return result */
+  UNPROTECT(P);
+  return(result);
 }
 
