@@ -102,6 +102,7 @@
 #'@param n Number of periods for the volatility estimate.
 #'@param calc The calculation (type) of estimator to use.
 #'@param N Number of periods per year.
+#'@param mean0 Use a mean of 0 rather than the sample mean.
 #'@param \dots Arguments to be passed to/from other methods.
 #'@return A object of the same class as \code{OHLC} or a vector (if
 #'\code{try.xts} fails) containing the chosen volatility estimator values.
@@ -110,33 +111,34 @@
 #'volatility measures.
 #'@references The following sites were used to code/document these
 #'indicators. All were created by Thijs van den Berg under the GNU Free
-#'Documentation License and were retrieved on 2008-04-20. The links are
-#'currently dead, but can be accessed via internet archives.\cr
+#'Documentation License and were retrieved on 2008-04-20. The original
+#'links are dead, but can be accessed via internet archives.\cr
 #'\cr Close-to-Close Volatility (\code{calc="close"}):\cr
-#'\url{http://www.sitmo.com/eq/172}\cr
+#'\url{https://web.archive.org/web/20100421083157/http://www.sitmo.com/eq/172}\cr
 #'\cr OHLC Volatility: Garman Klass (\code{calc="garman.klass"}):\cr
-#'\url{http://www.sitmo.com/eq/402}\cr
+#'\url{https://web.archive.org/web/20100326172550/http://www.sitmo.com/eq/402}\cr
 #'\cr High-Low Volatility: Parkinson (\code{calc="parkinson"}):\cr
-#'\url{http://www.sitmo.com/eq/173}\cr
+#'\url{https://web.archive.org/web/20100328195855/http://www.sitmo.com/eq/173}\cr
 #'\cr OHLC Volatility: Rogers Satchell (\code{calc="rogers.satchell"}):\cr
-#'\url{http://www.sitmo.com/eq/414}\cr
+#'\url{https://web.archive.org/web/20091002233833/http://www.sitmo.com/eq/414}\cr
 #'\cr OHLC Volatility: Garman Klass - Yang Zhang (\code{calc="gk.yz"}):\cr
-#'\url{http://www.sitmo.com/eq/409}\cr
+#'\url{https://web.archive.org/web/20100326215050/http://www.sitmo.com/eq/409}\cr
 #'\cr OHLC Volatility: Yang Zhang (\code{calc="yang.zhang"}):\cr
-#'\url{http://www.sitmo.com/eq/417}\cr
+#'\url{https://web.archive.org/web/20100326215050/http://www.sitmo.com/eq/409}\cr
 #'@keywords ts
 #'@examples
 #'
 #' data(ttrc)
 #' ohlc <- ttrc[,c("Open","High","Low","Close")]
 #' vClose <- volatility(ohlc, calc="close")
+#' vClose0 <- volatility(ohlc, calc="close", mean0=TRUE)
 #' vGK <- volatility(ohlc, calc="garman")
 #' vParkinson <- volatility(ohlc, calc="parkinson")
 #' vRS <- volatility(ohlc, calc="rogers")
 #'
 #'@export
 "volatility" <-
-function(OHLC, n=10, calc="close", N=260, ...) {
+function(OHLC, n=10, calc="close", N=260, mean0=FALSE, ...) {
 
   OHLC <- try.xts(OHLC, error=as.matrix)
 
@@ -160,7 +162,13 @@ function(OHLC, n=10, calc="close", N=260, ...) {
     } else {
       r <- ROC(OHLC[, 4], 1, ...)
     }
-    s <- sqrt(N) * runSD(r , n-1)
+    if( isTRUE(mean0) ) {
+      # This is an alternative SD calculation using an effective mean of 0
+      s <- sqrt(N) * sqrt(runSum(r^2, n-1) / (n-2))
+    } else {
+      # This is the standard SD calculation using the sample mean
+      s <- sqrt(N) * runSD(r, n-1)
+    }
   }
 
   # Historical Open-High-Low-Close Volatility: Garman Klass
@@ -189,7 +197,7 @@ function(OHLC, n=10, calc="close", N=260, ...) {
     # Historical Open-High-Low-Close Volatility: Garman and Klass (Yang Zhang)
     # http://www.sitmo.com/eq/409
     if(is.xts(OHLC)) {
-      Cl1 <- lag(OHLC[,4])
+      Cl1 <- lag.xts(OHLC[,4])
     } else {
       Cl1 <- c( NA, OHLC[-NROW(OHLC),4] )
     }
@@ -208,7 +216,7 @@ function(OHLC, n=10, calc="close", N=260, ...) {
     # Historical Open-High-Low-Close Volatility: Yang Zhang
     # http://www.sitmo.com/eq/417
     if(is.xts(OHLC)) {
-      Cl1 <- lag(OHLC[,4])
+      Cl1 <- lag.xts(OHLC[,4])
     } else {
       Cl1 <- c( NA, OHLC[-NROW(OHLC),4] )
     }

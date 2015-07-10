@@ -71,6 +71,7 @@ function(x, n=10, cumulative=FALSE) {
   NAs <- sum(is.na(x))
   if( NAs > 0 ) {
     if( any( is.na(x[-(1:NAs)]) ) ) stop("Series contains non-leading NAs")
+    if( NAs + n > NROW(x) ) stop("not enough non-NA values")
   }
   beg <- 1 + NAs
   len <- NROW(x) - NAs
@@ -91,7 +92,7 @@ function(x, n=10, cumulative=FALSE) {
                      oa = as.double(result[beg:NROW(x)]),
                      loa = as.integer(len),
                      PACKAGE = "TTR",
-                     DUP = FALSE )$oa
+                     DUP = TRUE )$oa
     
     # Prepend NAs from original data
     result <- c( rep( NA, NAs ), result )
@@ -119,6 +120,7 @@ function(x, n=10, cumulative=FALSE) {
   NAs <- sum( is.na(x) )
   if( NAs > 0 ) {
     if( any( is.na(x[-(1:NAs)]) ) ) stop("Series contains non-leading NAs")
+    if( NAs + n > NROW(x) ) stop("not enough non-NA values")
   }
   beg <- 1 + NAs
   len <- NROW(x) - NAs
@@ -138,7 +140,7 @@ function(x, n=10, cumulative=FALSE) {
                      oa = as.double(result[beg:NROW(x)]),
                      loa = as.integer(len),
                      PACKAGE = "TTR",
-                     DUP = FALSE )$oa
+                     DUP = TRUE )$oa
 
     # Prepend NAs from original data
     result <- c( rep( NA, NAs ), result )
@@ -166,6 +168,7 @@ function(x, n=10, cumulative=FALSE) {
   NAs <- sum( is.na(x) )
   if( NAs > 0 ) {
     if( any( is.na(x[-(1:NAs)]) ) ) stop("Series contains non-leading NAs")
+    if( NAs + n > NROW(x) ) stop("not enough non-NA values")
   }
   beg <- 1 + NAs
   len <- NROW(x) - NAs
@@ -185,7 +188,7 @@ function(x, n=10, cumulative=FALSE) {
                      oa = as.double(result[beg:NROW(x)]),
                      loa = as.integer(len),
                      PACKAGE = "TTR",
-                     DUP = FALSE )$oa
+                     DUP = TRUE )$oa
   }
 
   # Replace 1:(n-1) with NAs and prepend NAs from original data
@@ -227,6 +230,7 @@ function(x, n=10, non.unique="mean", cumulative=FALSE) {
   NAs <- sum( is.na(x) )
   if( NAs > 0 ) {
     if( any( is.na(x[-(1:NAs)]) ) ) stop("Series contains non-leading NAs")
+    if( NAs + n > NROW(x) ) stop("not enough non-NA values")
   }
   beg <- 1 + NAs
   len <- NROW(x) - NAs
@@ -244,7 +248,7 @@ function(x, n=10, non.unique="mean", cumulative=FALSE) {
                    ver = as.integer(non.unique),
                    cu = as.integer(cumulative),
                    PACKAGE = "TTR",
-                   DUP = FALSE )$oa
+                   DUP = TRUE )$oa
 
   # Replace 1:(n-1) with NAs and prepend NAs from original data
   is.na(result) <- c(1:(n-1))
@@ -279,6 +283,7 @@ function(x, y, n=10, use="all.obs", sample=TRUE, cumulative=FALSE) {
   NAs <- max( xNAs, yNAs )
   if( NAs > 0 ) {
     if( any( is.na(xy[-(1:NAs),]) ) ) stop("Series contain non-leading NAs")
+    if( NAs + n > NROW(x) ) stop("not enough non-NA values")
   }
   beg <- 1 + NAs
   len <- NROW(xy) - NAs
@@ -300,7 +305,7 @@ function(x, y, n=10, use="all.obs", sample=TRUE, cumulative=FALSE) {
                    oa = double(len),
                    cu = as.integer(cumulative),
                    PACKAGE = "TTR",
-                   DUP = FALSE )$oa
+                   DUP = TRUE )$oa
 
   # Replace 1:(n-1) with NAs and prepend NAs from original data
   is.na(result) <- c(1:(n-1))
@@ -367,6 +372,7 @@ function(x, n=10, center=NULL, stat="median",
   NAs <- sum( is.na(x) )
   if( NAs > 0 ) {
     if( any( is.na(x[-(1:NAs)]) ) ) stop("Series contains non-leading NAs")
+    if( NAs + n > NROW(x) ) stop("not enough non-NA values")
   }
   beg <- 1 + NAs
   len <- NROW(x) - NAs
@@ -395,7 +401,7 @@ function(x, n=10, center=NULL, stat="median",
                    ver = as.integer(non.unique),        # median type
                    cu = as.integer(cumulative),         # from inception
                    PACKAGE = "TTR",
-                   DUP = FALSE )$oa
+                   DUP = TRUE )$oa
 
   if( median ) result <- result * constant
 
@@ -420,7 +426,7 @@ function(x, n=10) {
 
   # Check for non-leading NAs
   # Leading NAs are handled in the C code
-  x.na <- xts:::naCheck(x, n)
+  x.na <- naCheck(x, n)
 
   # Call C routine
   result <- .Call("wilderSum", x, n, PACKAGE = "TTR")

@@ -38,7 +38,7 @@
 #'indicator:\cr \url{http://www.fmlabs.com/reference/OBV.htm}\cr
 #'\url{http://www.equis.com/Customer/Resources/TAAZ?c=3&p=82}\cr
 #'\url{http://linnsoft.com/tour/techind/obVol.htm}\cr
-#'\url{http://stockcharts.com/education/IndicatorAnalysis/indic-obv.htm}\cr
+#'\url{http://stockcharts.com/school/doku.php?id=chart_school:technical_indicators:on_balance_volume_obv}\cr
 #'@keywords ts
 #'@examples
 #'
@@ -58,7 +58,10 @@ function(price, volume) {
     price <- as.vector(price)
     volume <- as.vector(volume)
   }
-  obv <- c( volume[1], ifelse( ROC(price) > 0, volume, -volume )[-1] )
+  prChg <- ROC(price)
+  obv <- c( volume[1], ifelse( prChg > 0, volume, -volume )[-1] )
+  # OBV[t] = OBV[t-1] if price change is equal to zero
+  obv[abs(prChg) < sqrt(.Machine$double.eps)] <- 0
   obv <- cumsum( obv )
 
   if(is.xts(obv)) {

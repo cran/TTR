@@ -29,9 +29,6 @@ NULL
 #'as well as functions to retrieve U.S. stock symbols, and data from Yahoo
 #'Finance.
 #'
-#'\tabular{ll}{ Package: \tab TTR\cr Type: \tab Package\cr Version: \tab
-#'0.22-0\cr Date: \tab 2013-03-18\cr License: \tab GPL Version 2 or later.\cr }
-#'
 #'Users will probably be most interested in the following functions:\cr
 #'\code{\link{ADX}}\cr \code{\link{BBands}}\cr \code{\link{changes}}\cr
 #'\code{\link{MovingAverages}}\cr \code{\link{MACD}}\cr \code{\link{RSI}}\cr
@@ -40,6 +37,7 @@ NULL
 #'
 #'@name TTR
 #'@docType package
+#'@useDynLib TTR
 #'@author Joshua Ulrich
 #'
 #'Maintainer: Joshua Ulrich
@@ -82,4 +80,7 @@ NULL
 #' ibm <- getYahooData("IBM", 19990404, 20050607)
 #' 
 #'@rdname TTR
+#'@import xts zoo
+#'@importFrom stats approx embed na.omit sd
+#'@importFrom utils flush.console read.csv read.table
 NULL
