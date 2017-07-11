@@ -50,9 +50,9 @@
 #'for other indicators that measure trend direction/strength.
 #'@references The following site(s) were used to code/document this
 #'indicator:\cr \url{http://www.fmlabs.com/reference/CCI.htm}\cr
-#'\url{http://www.equis.com/Customer/Resources/TAAZ/?c=3&p=42}\cr
-#'\url{http://www.linnsoft.com/tour/techind/cci.htm}\cr
-#'\url{http://stockcharts.com/education/IndicatorAnalysis/indic_CCI.html}\cr
+#'\url{https://www.metastock.com/Customer/Resources/TAAZ/?p=42}\cr
+#'\url{https://www.linnsoft.com/techind/cci-commodity-channel-index}\cr
+#'\url{http://www.stockcharts.com/school/doku.php?id=chart_school:technical_indicators:commodity_channel_index_cci}\cr
 #'@keywords ts
 #'@examples
 #'

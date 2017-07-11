@@ -51,9 +51,9 @@
 #'@references The following site(s) were used to code/document this
 #'indicator:\cr \url{http://www.fmlabs.com/reference/TR.htm}\cr
 #'\url{http://www.fmlabs.com/reference/ATR.htm}\cr
-#'\url{http://www.equis.com/Customer/Resources/TAAZ/?c=3&p=35}\cr
-#'\url{http://www.linnsoft.com/tour/techind/trueRange.htm}\cr
-#'\url{http://stockcharts.com/education/IndicatorAnalysis/indic_ATR.html}\cr
+#'\url{https://www.metastock.com/Customer/Resources/TAAZ/?p=35}\cr
+#'\url{https://www.linnsoft.com/techind/true-range-tr}\cr
+#'\url{http://www.stockcharts.com/school/doku.php?id=chart_school:technical_indicators:average_true_range_atr}\cr
 #'@keywords ts
 #'@examples
 #'

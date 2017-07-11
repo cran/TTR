@@ -49,8 +49,8 @@
 #'options; and note Warning section.
 #'@references The following site(s) were used to code/document this
 #'indicator:\cr \url{http://www.fmlabs.com/reference/ArmsEMV.htm}\cr
-#'\url{http://www.equis.com/Customer/Resources/TAAZ/?c=3&p=51}\cr
-#'\url{http://linnsoft.com/tour/techind/arms.htm}\cr
+#'\url{https://www.metastock.com/Customer/Resources/TAAZ/?p=51}\cr
+#'\url{https://www.linnsoft.com/techind/arms-ease-movement}\cr
 #'@keywords ts
 #'@examples
 #'

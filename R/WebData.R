@@ -23,7 +23,8 @@
 #'
 #'\code{getYahooData} fetches individual stock data from the Yahoo! Finance
 #'website.  It also adjusts price for splits and dividends, and volume for
-#'splits.
+#'splits.  See the Warning section, and note that it is deprecated in favor
+#'of getSymbols in the quantmod package.
 #'
 #'\code{stockSymbols} fetches instrument symbols from the nasdaq.com website,
 #'and adjusts the symbols to be compatible with the Yahoo! Finance website.
@@ -72,9 +73,20 @@
 #'
 #' ### Note: you must have a working internet
 #' ### connection for these examples to work!
-#' ibm <- getYahooData("IBM", 19990404, 20050607)
+#' ge <- getYahooData("GE", 19990404, 20050607, adjust = FALSE)
 #'
 #' nyse.symbols <- stockSymbols("NYSE")
+#'
+#'@section Warning:
+#'As of TTR 0.23-2, \code{getYahooData} has been patched to work with changes
+#'to Yahoo Finance, which also included the following changes to the raw data:
+#'  \itemize{
+#'    \item The adjusted close column appears to no longer include dividend adjustments
+#'    \item The open, high, and low columns are adjusted for splits, and
+#'    \item The raw data may contain missing values.
+#'    \item The raw data may contain errors.
+#'  }
+#'
 #'@rdname WebData
 #'@export
 "stockSymbols" <-
@@ -180,6 +192,25 @@ function(exchange=c("AMEX","NASDAQ","NYSE"),
 "getYahooData" <-
 function(symbol, start, end, freq="daily", type="price", adjust=TRUE, quiet=FALSE) {
 
+  warn.Deprecated <- function() {
+    .Deprecated("quantmod::getSymbols", package = "TTR",
+                paste("TTR::getYahooData is deprecated and will be removed in a",
+                      "future release.\nPlease use quantmod::getSymbols instead."),
+                old = "getYahooData")
+  }
+
+  callingFun <- sys.call(-1L)[[1]]
+  if(is.null(callingFun)) {
+    # Called from top level
+    warn.Deprecated()
+  } else {
+    if(is.call(callingFun) && any(deparse(callingFun[[1]]) == c("::", ":::"))) {
+       if("getYahooData" != as.character(callingFun[[3]])) warn.Deprecated()
+    } else {
+       if("getYahooData" != deparse(callingFun)) warn.Deprecated()
+    }
+  }
+
   # Thank you to Giorgio Beltrame for the URL to download dividends _and_
   # splits, and for his correct adjustment procedure.
   # Many thanks to Ion Georgiadis for helpful suggestions and testing.
@@ -201,29 +232,32 @@ function(symbol, start, end, freq="daily", type="price", adjust=TRUE, quiet=FALS
 
   # Check dates
   if (missing(start)) {
-    beg <- as.POSIXlt( "1900-01-01" )
+    beg <- .dateToUNIX(as.Date("1900-01-01"))
   } else {
-    beg <- as.POSIXlt( as.Date( as.character(start), "%Y%m%d" ) )
+    beg <- .dateToUNIX(as.Date(as.character(start), "%Y%m%d"))
   }
   if (missing(end)) {
-    end <- as.POSIXlt(Sys.Date())
+    end <- .dateToUNIX(Sys.Date())
   } else {
-    end <- as.POSIXlt( as.Date( as.character( end ), "%Y%m%d" ) )
+    end <- .dateToUNIX(as.Date(as.character(end), "%Y%m%d"))
   }
 
-  if( beg > end )                    stop("Start date must be before end date.")
-  if( beg > as.POSIXlt(Sys.Date()) ) stop("Start date is after today's date.")
+  if( beg > end )                     stop("Start date must be before end date.")
+  if (beg > .dateToUNIX(Sys.Date()))  stop("Start date is after today's date.")
 
-  # Get freqeucy and type parameters
-  freq <- match.arg( freq, c("daily","weekly","monthly") )
+  # Get frequency and type parameters
+  intervals <- c(daily = "1d", weekly = "1wk", monthly = "1mo")
+  freq <- match.arg( freq, names(intervals) )
+  interval <- intervals[freq]
   type <- match.arg( type, c("price","split") )
-  if(type=="price") {
-    freq.url <- substr(freq,1,1)
-  } else {
-    freq.url <- "v"
-    if(freq!="daily" & !quiet) message("Only freq=\"daily\" data available for type=\"split\".\n",
-                                       "Setting freq=\"daily\"...")
+  if(type!="price") {
+    if(freq!="daily" & !quiet)
+      message("Only freq=\"daily\" data available for type=\"split\".\n",
+              "Setting freq=\"daily\"...")
   }
+
+  tmp <- tempfile()
+  on.exit(unlink(tmp), add = TRUE)
 
   flush.console()
 
@@ -271,17 +305,26 @@ function(symbol, start, end, freq="daily", type="price", adjust=TRUE, quiet=FALS
 
     } else {
 
-    # Construct URL for 'beg' to 'end'
-    url <- paste( "http://ichart.finance.yahoo.com/table.csv?s=", symbol,
-                  "&a=", beg$mon, "&b=", beg$mday, "&c=", beg$year+1900,
-                  "&d=", end$mon, "&e=", end$mday, "&f=", end$year+1900,
-                  "&g=", freq.url, "&ignore=.csv", sep="" )
+      handle <- .getHandle()
 
-    # Fetch data
-    ohlc <- read.table(url, header=TRUE, sep=",")
-    ohlc[,'Adj.Close'] <- NULL
-    ohlc <- ohlc[order(ohlc[,"Date"]),]
-    ohlc <- xts(ohlc[,-1], as.Date(as.character(ohlc[,1])))
+      # Construct URL for 'beg' to 'end'
+      url <- .yahooURL(symbol, beg, end, interval, "history", handle)
+
+      # Fetch data
+      curl::curl_download(url, destfile=tmp, quiet=quiet, handle=handle$ch)
+
+      # Read data
+      ohlc <- read.csv(tmp, na.strings="null")
+
+      # Re-order and set column names
+      cnames <- c("Date", "Open", "High", "Low", "Close", "Volume", "Adjusted")
+      corder <- pmatch(substr(cnames, 1, 3), colnames(ohlc))
+      ohlc <- ohlc[,corder]
+      colnames(ohlc) <- cnames
+
+      ohlc[,'Adjusted'] <- NULL
+      ohlc <- ohlc[order(ohlc[,"Date"]),]
+      ohlc <- xts(ohlc[,-1], as.Date(as.character(ohlc[,1])))
 
     }
 
@@ -289,34 +332,31 @@ function(symbol, start, end, freq="daily", type="price", adjust=TRUE, quiet=FALS
 
       if(!quiet) message("Unadjusted and adjusted dividend data are always returned.")
 
-      # Construct URL for 'beg' to 'end'
-      url <- paste( "http://ichart.finance.yahoo.com/x?s=", symbol,
-                    "&a=", beg$mon, "&b=", beg$mday, "&c=", beg$year+1900,
-                    "&d=", end$mon, "&e=", end$mday, "&f=", end$year+1900,
-                    "&g=", freq.url, "&y=0&z=30000", sep="" )
+      handle <- .getHandle()
 
-      # Fetch data
-      ohlc <- read.table(url, skip=1, sep=",", fill=TRUE, as.is=TRUE)
-      div  <- data.frame( Date=   ohlc[ohlc[,"V1"]=="DIVIDEND","V2"],
-                          Adj.Div=as.numeric(ohlc[ohlc[,"V1"]=="DIVIDEND","V3"]),
-                          stringsAsFactors=FALSE )
-      spl  <- data.frame( Date=   ohlc[ohlc[,"V1"]=="SPLIT","V2"],
-                          Split=as.character(ohlc[ohlc[,"V1"]=="SPLIT","V3"]),
-                          stringsAsFactors=FALSE )
+      # Split data
+      url <- .yahooURL(symbol, beg, end, "1d", "split", handle)
+      curl::curl_download(url, destfile=tmp, quiet=quiet, handle=handle$ch)
+      spl <- read.csv(tmp, as.is=TRUE)
+      if(NROW(spl)==0) {
+        spl <- NA
+      } else {
+        spl$V3 <- 1 / sapply(parse(text=spl[,2]), eval)
+        spl <- xts(spl$V3, as.Date(spl[,1], "%Y-%m-%d"))
+        colnames(spl) <- NULL
+      }
 
-      ohlc <- merge(div, spl, by.col="Date", all=TRUE)
-      
+      # Dividend data
+      url <- .yahooURL(symbol, beg, end, "1d", "div", handle)
+      curl::curl_download(url, destfile=tmp, quiet=quiet, handle=handle$ch)
+      div <- read.csv(tmp, as.is=TRUE)
+      div <- xts(div[,2],as.Date(div[,1]))
+      colnames(div) <- NULL
+
+      ohlc <- merge(Adj.Div = div, Split = spl)
+
       # Return (empty) data
       if(NROW(ohlc)==0) return(ohlc)
-      
-      ohlc[,'Date'] <- as.Date(as.character(ohlc[,'Date']), "%Y%m%d")
-
-      # Create split adjustment ratio, (always = 1 if no splits exist)
-      ohlc[,'Split'] <- sub(":","/", ohlc[,'Split'])
-      ohlc[,'Split'] <- 1 / sapply( parse( text=ohlc[,'Split'] ), eval )
-
-      ohlc <- ohlc[order(ohlc[,1]),]
-      ohlc <- xts(ohlc[,-1], as.Date(as.character(ohlc[,1])))
 
       if( all(is.na(ohlc[,'Split'])) ) {
         s.ratio <- rep(1,NROW(ohlc))
@@ -334,7 +374,9 @@ function(symbol, start, end, freq="daily", type="price", adjust=TRUE, quiet=FALS
     }
 
   # Only return requested data
-  ohlc <- ohlc[paste(beg,end,sep='/'),]
+  dateRange <- paste(as.Date(.POSIXct(beg, tz = "UTC")),
+                     as.Date(.POSIXct(end, tz = "UTC")), sep = "/")
+  ohlc <- ohlc[dateRange]
 
   ### Check to see if supplied dates occur in data set
 #  if( max(ohlc[,'Date']) != as.Date(end) ) {
@@ -345,4 +387,66 @@ function(symbol, start, end, freq="daily", type="price", adjust=TRUE, quiet=FALS
 #  }
 
   return(ohlc)
+}
+
+.getHandle <- function(force.new = FALSE)
+{
+  h <- if (exists("_handle_", .env)) get("_handle_", .env) else NULL
+
+  if (is.null(h) || force.new) {
+    # create 'h' if it doesn't exist yet
+    if (!force.new) {
+      h <- list()
+    }
+
+    # establish session
+    new.session <- function(h) {
+      tmp <- tempfile()
+      on.exit(unlink(tmp))
+
+      for (i in 1:5) {
+        h <- curl::new_handle()
+        # random query to avoid cache
+        ru <- paste(sample(c(letters, 0:9), 4), collapse = "")
+        cu <- paste0("https://finance.yahoo.com?", ru)
+        curl::curl_download(cu, tmp, handle = h)
+        if (NROW(curl::handle_cookies(h)) > 0)
+          break;
+        Sys.sleep(0.1)
+      }
+
+      if (NROW(curl::handle_cookies(h)) == 0)
+        stop("Could not establish session after 5 attempts.")
+
+      return(h)
+    }
+
+    h$ch <- new.session()
+
+    n <- if (unclass(Sys.time()) %% 1L >= 0.5) 1L else 2L
+    query.srv <- paste0("https://query", n, ".finance.yahoo.com/",
+                        "v1/test/getcrumb")
+    cres <- curl::curl_fetch_memory(query.srv, handle = h$ch)
+
+    h$cb <- rawToChar(cres$content)
+    assign("_handle_", h, .env)
+  }
+  return(h)
+}
+
+.yahooURL <-
+function(symbol, from, to, period, type, handle)
+{
+  p <- match.arg(period, c("1d", "1wk", "1mo"))
+  e <- match.arg(type, c("history", "div", "split"))
+  n <- if (unclass(Sys.time()) %% 1L >= 0.5) 1L else 2L
+  u <- paste0("https://query", n, ".finance.yahoo.com/v7/finance/download/",
+              symbol, "?period1=", from, "&period2=", to, "&interval=", p,
+              "&events=", e, "&crumb=", handle$cb)
+  return(u)
+}
+
+.dateToUNIX <- function(Date) {
+  posixct <- as.POSIXct(as.Date(Date, origin = "1970-01-01"))
+  trunc(as.numeric(posixct))
 }

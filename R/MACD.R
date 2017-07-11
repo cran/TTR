@@ -52,8 +52,8 @@
 #' }
 #'@note The MACD is a special case of the general oscillator applied to price.
 #'The MACD can be used as a general oscillator applied to any series. Time
-#'periods for the MACD are often given as 26 and 12, but the function
-#'originally used exponential constants of 0.075 and 0.15, which are closer to
+#'periods for the MACD are often given as 26 and 12, but the original formula
+#'used exponential constants of 0.075 and 0.15, which are closer to
 #'25.6667 and 12.3333 periods.
 #'@author Joshua Ulrich
 #'@seealso See \code{\link{EMA}}, \code{\link{SMA}}, etc. for moving average
@@ -62,17 +62,17 @@
 #'indicator:
 #'\cr Moving Average Convergence/Divergence (MACD):\cr
 #'\url{http://www.fmlabs.com/reference/MACD.htm}\cr
-#'\url{http://www.equis.com/Customer/Resources/TAAZ/?c=3&p=66}\cr
-#'\url{http://linnsoft.com/tour/techind/macd.htm}\cr
-#'\url{http://stockcharts.com/school/doku.php?id=chart_school:technical_indicators:moving_average_convergence_divergence_macd}\cr
+#'\url{https://www.metastock.com/Customer/Resources/TAAZ/?p=66}\cr
+#'\url{https://www.linnsoft.com/techind/macd}\cr
+#'\url{http://www.stockcharts.com/school/doku.php?id=chart_school:technical_indicators:moving_average_convergence_divergence_macd}\cr
 #'\cr Price Oscillator:\cr
 #'\url{http://www.fmlabs.com/reference/PriceOscillator.htm}\cr
 #'\url{http://www.fmlabs.com/reference/PriceOscillatorPct.htm}\cr
-#'\url{http://www.equis.com/Customer/Resources/TAAZ/?c=3&p=94}\cr
-#'\url{http://stockcharts.com/school/doku.php?id=chart_school:technical_indicators:price_oscillators_ppo}\cr
+#'\url{https://www.metastock.com/Customer/Resources/TAAZ/?p=94}\cr
+#'\url{http://www.stockcharts.com/school/doku.php?id=chart_school:technical_indicators:price_oscillators_ppo}\cr
 #'\cr Volume Oscillator:\cr
 #'\url{http://www.fmlabs.com/reference/PVO.htm}\cr
-#'\url{http://www.equis.com/Customer/Resources/TAAZ/Default.aspx?c=3&p=122}\cr
+#'\url{https://www.metastock.com/Customer/Resources/TAAZ/?p=122}\cr
 #'@keywords ts
 #'@examples
 #'

@@ -28,11 +28,11 @@
 #'@aliases runPercentRank percentRank PercentRank
 #'@param x Object coercible to xts or matrix.
 #'@param n Number of periods to use in the window or, if
-#'\code{cumulative=TRUE}, the number of obversations to use before the first
-#'result is returned.
+#'\code{cumulative=TRUE}, the number of observations to use before the first
+#'result is returned. Must be between 1 and \code{nrow(x)}, inclusive.
 #'@param cumulative Logical, use from-inception calculation?
 #'@param exact.multiplier The weight applied to identical values in the window.
-#'See details.
+#'Must be between 0 and 1, inclusive. See details.
 #'@return A object of percent ranks over a n-period moving window of the same
 #'class as \code{x} and \code{y} or a vector (if \code{try.xts} fails).
 #'@note It may be important to note that this computation is different from the
@@ -47,30 +47,23 @@
 runPercentRank <- function(x, n=260, cumulative = FALSE, exact.multiplier = 0.5) {
   x <- try.xts(x, error = as.matrix)
 
-  if (n < 1 || n > NROW(x)) stop("Invalid 'n'")
-  if (0 > exact.multiplier || exact.multiplier > 1) stop("Invalid 'exact.multiplier'")
+  if (n < 1 || n > NROW(x))
+    stop(sprintf("n = %d is outside valid range: [1, %d]", n, NROW(x)))
+  if (exact.multiplier < 0 || exact.multiplier > 1)
+    stop(sprintf("exact.multiplier = %d is outside valid range: [0, 1]", exact.multiplier))
 
   NAs <- sum(is.na(x))
   if (NAs > 0) {
     if (any(is.na(x[-(1:NAs)]))) stop("Series contains non-leading NAs")
   }
-  beg <- 1 + NAs
 
-  len <- NROW(x) - NAs
-  result <- double(NROW(x))
-
-  if (cumulative) {
-    result <- .Fortran("cumprnk", ia = as.double(x[beg:NROW(x)]), lia = as.integer(len), 
-              xmlt = as.double(exact.multiplier), oa = as.double(result[beg:NROW(x)]), 
-              PACKAGE = "TTR", DUP = TRUE)$oa
-  } else if (identical(as.integer(n),1L)) {
+  if (identical(as.integer(n), 1L)) {
+    result <- double(NROW(x))
     result[] <- exact.multiplier
   } else {
-    result <- .Fortran("runprnk", ia = as.double(x[beg:NROW(x)]), lia = as.integer(len), 
-              n = as.integer(n), xmlt = as.double(exact.multiplier), 
-              oa = as.double(result[beg:NROW(x)]), PACKAGE = "TTR", DUP = TRUE)$oa
-    is.na(result) <- c(1:(n - 1))
+    result <- .Call("ttr_rollPercentRank", x, n, isTRUE(cumulative),
+                    exact.multiplier, PACKAGE = "TTR")
   }
-  result <- c(rep(NA, NAs), result)
+
   reclass(result, x)
 }

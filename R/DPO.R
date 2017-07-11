@@ -46,8 +46,8 @@
 #'@references The following site(s) were used to code/document this
 #'indicator:\cr
 #'\url{http://www.fmlabs.com/reference/DPO.htm}\cr
-#'\url{http://www.equis.com/Customer/Resources/TAAZ/?c=3&p=48}\cr
-#'\url{http://stockcharts.com/school/doku.php?id=chart_school:technical_indicators:detrended_price_osci}\cr
+#'\url{https://www.metastock.com/Customer/Resources/TAAZ/?p=48}\cr
+#'\url{http://www.stockcharts.com/school/doku.php?id=chart_school:technical_indicators:detrended_price_osci}\cr
 #'@keywords ts
 #'@examples
 #'

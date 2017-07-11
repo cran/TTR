@@ -43,9 +43,9 @@ NULL
 #'Maintainer: Joshua Ulrich
 #'@references The following sites were used to code/document this package:\cr
 #'\url{http://www.fmlabs.com/reference/default.htm}\cr
-#'\url{http://www.equis.com/Customer/Resources/TAAZ/?p=0}\cr
-#'\url{http://www.linnsoft.com/tour/technicalindicators.htm}\cr
-#'\url{http://stockcharts.com/education/IndicatorAnalysis/}\cr
+#'\url{https://www.metastock.com/Customer/Resources/TAAZ/}\cr
+#'\url{https://www.linnsoft.com/indicators}\cr
+#'\url{http://www.stockcharts.com/school/doku.php?id=chart_school:technical_indicators}\cr
 #'@keywords package
 #'@examples
 #'
@@ -77,10 +77,11 @@ NULL
 #' nyseSymbols <- stockSymbols("NYSE")
 #'
 #' # Fetch Yahoo! Finance data from the internet
-#' ibm <- getYahooData("IBM", 19990404, 20050607)
+#' ge <- getYahooData("GE", 19990404, 20050607, adjust = FALSE)
 #' 
 #'@rdname TTR
 #'@import xts zoo
+#'@importFrom curl new_handle curl_download
 #'@importFrom stats approx embed na.omit sd
 #'@importFrom utils flush.console read.csv read.table
 NULL

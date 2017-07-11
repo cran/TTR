@@ -59,7 +59,8 @@
 #'@param price Price series that is coercible to xts or matrix.
 #'@param volume Volume series that is coercible to xts or matrix, that
 #'corresponds to price series, or a constant.  See Notes.
-#'@param n Number of periods to average over.
+#'@param n Number of periods to average over. Must be between 1 and
+#'\code{nrow(x)}, inclusive.
 #'@param v The 'volume factor' (a number in [0,1]).  See Notes.
 #'@param w Vector of weights (in [0,1]) the same length as \code{x}.
 #'@param wts Vector of weights.  Length of \code{wts} vector must equal the
@@ -88,7 +89,9 @@
 #' }
 #'@note For \code{EMA}, \code{wilder=FALSE} (the default) uses an exponential
 #'smoothing ratio of \code{2/(n+1)}, while \code{wilder=TRUE} uses Welles
-#'Wilder's exponential smoothing ratio of \code{1/n}.
+#'Wilder's exponential smoothing ratio of \code{1/n}. The \code{EMA} result
+#'is initialized with the \code{n}-period sample average at period \code{n}.
+#'The exponential decay is applied from that point forward.
 #'
 #'Since \code{WMA} can accept a weight vector of length equal to the length of
 #'\code{x} or of length \code{n}, it can be used as a regular weighted moving
@@ -119,7 +122,7 @@
 #'\url{http://www.fmlabs.com/reference/WeightedMA.htm}\cr
 #'\url{http://www.fmlabs.com/reference/DEMA.htm}\cr
 #'\url{http://www.fmlabs.com/reference/T3.htm}\cr
-#'\url{http://linnsoft.com/tour/techind/evwma.htm}\cr
+#'\url{https://www.linnsoft.com/techind/evwma-elastic-volume-weighted-moving-average}\cr
 #'\url{http://www.fmlabs.com/reference/ZeroLagExpMA.htm}\cr
 #'\url{http://www.fmlabs.com/reference/VIDYA.htm}\cr
 #'\url{http://www.traderslog.com/hullmovingaverage}\cr
@@ -177,7 +180,7 @@ function (x, n=10, wilder=FALSE, ratio=NULL, ...) {
 
   x <- try.xts(x, error=as.matrix)
   if( n < 1 || n > NROW(x) )
-    stop("Invalid 'n'")
+    stop(sprintf("n = %d is outside valid range: [1, %d]", n, NROW(x)))
   if(NCOL(x) > 1) {
     stop("ncol(x) > 1. EMA only supports univariate 'x'")
   }
@@ -252,7 +255,7 @@ function(x, n=10, wts=1:n, ...) {
   if( !any( NROW(wts) == c( NROW(x), n ) ) )
     stop("Length of 'wts' must equal the length of 'x' or 'n'")
   if( n < 1 || n > NROW(x) )
-    stop("Invalid 'n'")
+    stop(sprintf("n = %d is outside valid range: [1, %d]", n, NROW(x)))
   if(NCOL(x) > 1 || NCOL(wts) > 1) {
     stop("ncol(x) > 1 or ncol(wts) > 1. WMA only supports univariate 'x' and 'w'")
   }
@@ -318,7 +321,7 @@ function(price, volume, n=10, ...) {
   if( !any( NROW(volume) == c( NROW(price), 1 ) ) )
     stop("Length of 'volume' must equal 1 or the length of 'price'")
   if( n < 1 || n > NROW(price) )
-    stop("Invalid 'n'")
+    stop(sprintf("n = %d is outside valid range: [1, %d]", n, NROW(price)))
   if(NCOL(price) > 1 || NCOL(volume) > 1) {
     stop("ncol(price) > 1 or ncol(volume) > 1.",
          " EVWMA only supports univariate 'price' and 'volume'")
