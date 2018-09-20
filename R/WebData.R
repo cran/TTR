@@ -73,9 +73,11 @@
 #'
 #' ### Note: you must have a working internet
 #' ### connection for these examples to work!
-#' ge <- getYahooData("GE", 19990404, 20050607, adjust = FALSE)
+#' if (interactive()) {
+#'   ge <- getYahooData("GE", 19990404, 20050607, adjust = FALSE)
 #'
-#' nyse.symbols <- stockSymbols("NYSE")
+#'   nyse.symbols <- stockSymbols("NYSE")
+#' }
 #'
 #'@section Warning:
 #'As of TTR 0.23-2, \code{getYahooData} has been patched to work with changes
@@ -121,7 +123,7 @@ function(exchange=c("AMEX","NASDAQ","NYSE"),
     flush.console()
 
     # Fetch Symbols
-    url  <- paste("http://www.nasdaq.com/screening/companies-by-name.aspx",
+    url  <- paste("https://www.nasdaq.com/screening/companies-by-name.aspx",
                   "?letter=0&exchange=",i,"&render=download",sep="")
     exch <- read.csv(url, header=TRUE, as.is=TRUE, na="n/a")
 

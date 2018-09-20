@@ -18,8 +18,8 @@
  */
 
 /* Includes and defines from WRE Section 5.4.2 */
+#include "ttr.h"
 #include <R.h>
-#include <Rinternals.h>
 #include <stdlib.h>  /* for NULL */
 #include <R_ext/Rdynload.h>
 
@@ -29,7 +29,7 @@
 /* Declare .Call calls */
 extern SEXP adjRatios(SEXP, SEXP, SEXP);
 extern SEXP aroon_max(SEXP, SEXP);
-extern SEXP ema(SEXP, SEXP, SEXP);
+extern SEXP ema(SEXP, SEXP, SEXP, SEXP);
 extern SEXP evwma(SEXP, SEXP, SEXP);
 extern SEXP sar(SEXP, SEXP, SEXP, SEXP);
 extern SEXP ttr_rollPercentRank(SEXP, SEXP, SEXP, SEXP);
@@ -50,7 +50,7 @@ extern void F77_NAME(zlema)(double *, int *, int *, double *, int *, double *);
 static const R_CallMethodDef CallEntries[] = {
   CALLDEF(adjRatios,            3),
   CALLDEF(aroon_max,            2),
-  CALLDEF(ema,                  3),
+  CALLDEF(ema,                  4),
   CALLDEF(evwma,                3),
   CALLDEF(sar,                  4),
   CALLDEF(ttr_rollPercentRank,  4),
@@ -78,4 +78,6 @@ void R_init_TTR(DllInfo *dll)
   R_registerRoutines(dll, NULL, CallEntries, FortranEntries, NULL);
   R_useDynamicSymbols(dll, FALSE);
   //R_forceSymbols(dll, TRUE);  /* only use R symbols (not strings) */
+
+  xts_na_check = (SEXP(*)(SEXP,SEXP)) R_GetCCallable("xts", "naCheck");
 }
