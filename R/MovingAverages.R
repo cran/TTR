@@ -154,7 +154,6 @@
 #' tail( EMA(x[ 1:100],10), 1 )
 #' 
 #'@rdname MovingAverages
-#'@export
 "SMA" <-
 function(x, n=10, ...) {
 
@@ -172,7 +171,6 @@ function(x, n=10, ...) {
 #-------------------------------------------------------------------------#
 
 #'@rdname MovingAverages
-#'@export
 "EMA" <-
 function (x, n=10, wilder=FALSE, ratio=NULL, ...) {
 
@@ -209,7 +207,6 @@ function (x, n=10, wilder=FALSE, ratio=NULL, ...) {
 #-------------------------------------------------------------------------#
 
 #'@rdname MovingAverages
-#'@export
 "DEMA" <-
 function(x, n=10, v=1, wilder=FALSE, ratio=NULL) {
 
@@ -246,7 +243,6 @@ function(x, n=10, v=1, wilder=FALSE, ratio=NULL) {
 #-------------------------------------------------------------------------#
 
 #'@rdname MovingAverages
-#'@export
 "WMA" <-
 function(x, n=10, wts=1:n, ...) {
 
@@ -282,16 +278,9 @@ function(x, n=10, wts=1:n, ...) {
     if( any(is.na(wts)) )
       stop("'wts' vector of length 'n' cannot have NA values")
 
-    # Call Fortran routine
-    ma <- .Fortran( "wma", ia = as.double(x),
-                           lia = as.integer(NROW(x)),
-                           wts = as.double(wts),
-                           n = as.integer(n),
-                           oa = as.double(x),
-                           loa = as.integer(NROW(x)),
-                           PACKAGE = "TTR",
-                           DUP = TRUE )$oa
-   
+    # Call C routine
+    ma <- .Call("wma", x, wts, n, PACKAGE = "TTR")
+
   } else {
     
     xw <- na.omit( cbind(x, wts) )
@@ -312,7 +301,6 @@ function(x, n=10, wts=1:n, ...) {
 #-------------------------------------------------------------------------#
 
 #'@rdname MovingAverages
-#'@export
 "EVWMA" <-
 function(price, volume, n=10, ...) {
 
@@ -354,7 +342,6 @@ function(price, volume, n=10, ...) {
 #-------------------------------------------------------------------------#
 
 #'@rdname MovingAverages
-#'@export
 "ZLEMA" <-
 function (x, n=10, ratio=NULL, ...) {
 
@@ -365,37 +352,14 @@ function (x, n=10, ratio=NULL, ...) {
     stop("ncol(x) > 1. ZLEMA only supports univariate 'x'")
   }
   
-  # Count NAs, ensure they're only at beginning of data, then remove.
-  NAs <- sum( is.na(x) )
-  if( NAs > 0 ) {
-    if( any( is.na(x[-(1:NAs)]) ) )
-      stop("Series contains non-leading NAs")
-  }
-  x   <- na.omit(x)
+  # If ratio is specified, and n is not, set n to approx 'correct'
+  # value backed out from ratio
+  if(missing(n) && !missing(ratio))
+    n <- NULL
 
-  # Initialize ma vector
-  ma <- rep(1, NROW(x))
-  ma[n] <- mean(x[1:n])
+  # Call C routine
+  ma <- .Call("zlema", x, n, ratio, PACKAGE = "TTR")
 
-  # Determine decay ratio
-  if(is.null(ratio)) {
-    ratio <- 2/(n+1)
-  }
-
-  # Call Fortran routine
-  ma <- .Fortran( "zlema", ia = as.double(x),
-                           lia = as.integer(NROW(x)),
-                           n = as.integer(n),
-                           oa = as.double(ma),
-                           loa = as.integer(NROW(ma)),
-                           ratio = as.double(ratio),
-                           PACKAGE = "TTR",
-                           DUP = TRUE )$oa
-
-  # replace 1:(n-1) with NAs and prepend NAs from original data
-  ma[1:(n-1)] <- NA
-  ma <- c( rep( NA, NAs ), ma ) 
-  
   if(!is.null(dim(ma))) {
     colnames(ma) <- "ZLEMA"
   }
@@ -406,7 +370,6 @@ function (x, n=10, ratio=NULL, ...) {
 #-------------------------------------------------------------------------#
 
 #'@rdname MovingAverages
-#'@export VWAP VWMA
 "VWAP" <- "VWMA" <-
 function(price, volume, n=10, ...) {
 
@@ -425,7 +388,6 @@ function(price, volume, n=10, ...) {
 #-------------------------------------------------------------------------#
 
 #'@rdname MovingAverages
-#'@export
 "VMA" <-
 function (x, w, ratio=1, ...) {
 
@@ -459,7 +421,6 @@ function (x, w, ratio=1, ...) {
 #-------------------------------------------------------------------------#
 
 #'@rdname MovingAverages
-#'@export
 "HMA" <-
 function(x, n=20, ...) {
 
@@ -471,7 +432,6 @@ function(x, n=20, ...) {
 #-------------------------------------------------------------------------#
 
 #'@rdname MovingAverages
-#'@export
 "ALMA" <-
 function(x, n=9, offset=0.85, sigma=6, ...) {
 

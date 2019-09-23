@@ -79,7 +79,6 @@
 #'              maDown=list(WMA,wts=1:10)))
 #'
 #'
-#'@export
 "RSI" <- 
 function(price, n=14, maType, ...) {
 
@@ -95,7 +94,10 @@ function(price, n=14, maType, ...) {
   # Default Welles Wilder EMA
   if(missing(maType)) {
     maType <- 'EMA'
-    maArgs$wilder <- TRUE
+    if(is.null(maArgs$wilder)) {
+      # do not overwrite user-provided value
+      maArgs$wilder <- TRUE
+    }
   }
 
   # Case of two different 'maType's for both MAs.

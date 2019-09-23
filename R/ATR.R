@@ -60,7 +60,6 @@
 #' data(ttrc)
 #' atr <- ATR(ttrc[,c("High","Low","Close")], n=14)
 #'
-#'@export
 "ATR" <-
 function(HLC, n=14, maType, ...) {
 
@@ -83,7 +82,10 @@ function(HLC, n=14, maType, ...) {
   # Default Welles Wilder EMA
   if(missing(maType)) {
     maType <- 'EMA'
-    maArgs$wilder <- TRUE
+    if(is.null(maArgs$wilder)) {
+      # do not overwrite user-provided value
+      maArgs$wilder <- TRUE
+    }
   }
 
   atr <- do.call( maType, c( list(tr), maArgs ) )

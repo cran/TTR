@@ -64,7 +64,6 @@
 #' data(ttrc)
 #' dmi.adx <- ADX(ttrc[,c("High","Low","Close")])
 #'
-#'@export
 "ADX" <-
 function(HLC, n=14, maType, ...) {
 
@@ -90,7 +89,10 @@ function(HLC, n=14, maType, ...) {
   # Default Welles Wilder EMA
   if(missing(maType)) {
     maType <- 'EMA'
-    maArgs$wilder <- TRUE
+    if(is.null(maArgs$wilder)) {
+      # do not overwrite user-provided value
+      maArgs$wilder <- TRUE
+    }
   }
 
   ADX <- do.call( maType, c( list(DX), maArgs ) )

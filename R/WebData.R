@@ -90,7 +90,6 @@
 #'  }
 #'
 #'@rdname WebData
-#'@export
 "stockSymbols" <-
 function(exchange=c("AMEX","NASDAQ","NYSE"),
          sort.by=c("Exchange","Symbol"), quiet=FALSE) {
@@ -123,7 +122,7 @@ function(exchange=c("AMEX","NASDAQ","NYSE"),
     flush.console()
 
     # Fetch Symbols
-    url  <- paste("https://www.nasdaq.com/screening/companies-by-name.aspx",
+    url  <- paste("https://old.nasdaq.com/screening/companies-by-name.aspx",
                   "?letter=0&exchange=",i,"&render=download",sep="")
     exch <- read.csv(url, header=TRUE, as.is=TRUE, na="n/a")
 
@@ -190,7 +189,6 @@ function(exchange=c("AMEX","NASDAQ","NYSE"),
 #-------------------------------------------------------------------------#
 
 #'@rdname WebData
-#'@export
 "getYahooData" <-
 function(symbol, start, end, freq="daily", type="price", adjust=TRUE, quiet=FALSE) {
 
