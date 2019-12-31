@@ -450,5 +450,6 @@ function(x, n=9, offset=0.85, sigma=6, ...) {
   if(sumWeights != 0)
     wts <- wts/sumWeights
   alma <- rollapply(x, width=n, FUN=function(xx) sum(xx*wts), align="right")
+  alma <- c(rep(NA, n-1), alma)
   reclass(alma, x)
 }
