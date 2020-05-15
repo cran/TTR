@@ -208,7 +208,7 @@ function (x, n=10, wilder=FALSE, ratio=NULL, ...) {
 
 #'@rdname MovingAverages
 "DEMA" <-
-function(x, n=10, v=1, wilder=FALSE, ratio=NULL) {
+function(x, n=10, v=1, wilder=FALSE, ratio=NULL,  ...) {
 
   # Double Exponential Moving Average
   # Thanks to John Gavin for the v-factor generalization
