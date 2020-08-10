@@ -7,14 +7,20 @@
 \alias{SMI}
 \alias{\%K}
 \alias{\%D}
-\alias{SMI}
 \title{Stochastic Oscillator / Stochastic Momentum Index}
 \usage{
-stoch(HLC, nFastK = 14, nFastD = 3, nSlowD = 3, maType, bounded = TRUE,
-  smooth = 1, ...)
+stoch(
+  HLC,
+  nFastK = 14,
+  nFastD = 3,
+  nSlowD = 3,
+  maType,
+  bounded = TRUE,
+  smooth = 1,
+  ...
+)
 
-SMI(HLC, n = 13, nFast = 2, nSlow = 25, nSig = 9, maType,
-  bounded = TRUE, ...)
+SMI(HLC, n = 13, nFast = 2, nSlow = 25, nSig = 9, maType, bounded = TRUE, ...)
 }
 \arguments{
 \item{HLC}{Object that is coercible to xts or matrix and contains
@@ -130,12 +136,12 @@ stochRSI <- stoch( RSI(ttrc[,"Close"]) )
 The following site(s) were used to code/document these
 indicators:
 \cr Stochastic Oscillator:\cr
-\url{http://www.fmlabs.com/reference/StochasticOscillator.htm}\cr
+\url{https://www.fmlabs.com/reference/StochasticOscillator.htm}\cr
 \url{https://www.metastock.com/Customer/Resources/TAAZ/?p=106}\cr
 \url{https://www.linnsoft.com/techind/stochastics}\cr
-\url{http://www.stockcharts.com/school/doku.php?id=chart_school:technical_indicators:stochastic_oscillator_fast_slow_and_full}\cr
+\url{https://www.stockcharts.com/school/doku.php?id=chart_school:technical_indicators:stochastic_oscillator_fast_slow_and_full}\cr
 \cr SMI:\cr
-\url{http://www.fmlabs.com/reference/default.htm?url=SMI.htm}\cr
+\url{https://www.fmlabs.com/reference/default.htm?url=SMI.htm}\cr
 }
 \seealso{
 See \code{\link{EMA}}, \code{\link{SMA}}, etc. for moving average

@@ -3,7 +3,6 @@
 \docType{package}
 \name{TTR}
 \alias{TTR}
-\alias{TTR-package}
 \title{Functions to create Technical Trading Rules (TTR)}
 \description{
 This package contains many of the most popular technical analysis functions,
@@ -49,13 +48,14 @@ if (interactive()) {
   # Fetch Yahoo! Finance data from the internet
   ge <- getYahooData("GE", 19990404, 20050607, adjust = FALSE)
 }
+
 }
 \references{
 The following sites were used to code/document this package:\cr
-\url{http://www.fmlabs.com/reference/default.htm}\cr
+\url{https://www.fmlabs.com/reference/default.htm}\cr
 \url{https://www.metastock.com/Customer/Resources/TAAZ/}\cr
 \url{https://www.linnsoft.com/indicators}\cr
-\url{http://www.stockcharts.com/school/doku.php?id=chart_school:technical_indicators}\cr
+\url{https://www.stockcharts.com/school/doku.php?id=chart_school:technical_indicators}\cr
 }
 \author{
 Joshua Ulrich

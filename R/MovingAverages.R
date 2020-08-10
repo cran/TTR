@@ -118,15 +118,15 @@
 #'@seealso See \code{\link{wilderSum}}, which is used in calculating a Welles
 #'Wilder type MA.
 #'@references The following site(s) were used to code/document this
-#'indicator:\cr \url{http://www.fmlabs.com/reference/ExpMA.htm}\cr
-#'\url{http://www.fmlabs.com/reference/WeightedMA.htm}\cr
-#'\url{http://www.fmlabs.com/reference/DEMA.htm}\cr
-#'\url{http://www.fmlabs.com/reference/T3.htm}\cr
+#'indicator:\cr \url{https://www.fmlabs.com/reference/ExpMA.htm}\cr
+#'\url{https://www.fmlabs.com/reference/WeightedMA.htm}\cr
+#'\url{https://www.fmlabs.com/reference/DEMA.htm}\cr
+#'\url{https://www.fmlabs.com/reference/T3.htm}\cr
 #'\url{https://www.linnsoft.com/techind/evwma-elastic-volume-weighted-moving-average}\cr
-#'\url{http://www.fmlabs.com/reference/ZeroLagExpMA.htm}\cr
-#'\url{http://www.fmlabs.com/reference/VIDYA.htm}\cr
-#'\url{http://www.traderslog.com/hullmovingaverage}\cr
-#'\url{http://www.arnaudlegoux.com/}\cr
+#'\url{https://www.fmlabs.com/reference/ZeroLagExpMA.htm}\cr
+#'\url{https://www.fmlabs.com/reference/VIDYA.htm}\cr
+#'\url{https://www.traderslog.com/hullmovingaverage}\cr
+#'\url{https://web.archive.org/web/20180222085959/http://arnaudlegoux.com/}\cr
 #'@keywords ts
 #'@examples
 #'
@@ -272,7 +272,6 @@ function(x, n=10, wts=1:n, ...) {
   
   if( NROW(wts) == n ) {
     
-    x <- na.omit(x)
     NAs <- NAx
 
     if( any(is.na(wts)) )
@@ -283,13 +282,12 @@ function(x, n=10, wts=1:n, ...) {
 
   } else {
     
-    xw <- na.omit( cbind(x, wts) )
+    xw <- cbind(x, wts)
     ma <- runSum( xw[,1]*xw[,2], n) / runSum(xw[,2], n)
   }
 
   # replace 1:(n-1) with NAs and prepend NAs from original data
   ma[1:(n-1)] <- NA
-  ma <- c( rep( NA, NAs ), ma )
 
   if(!is.null(dim(ma))) {
     colnames(ma) <- "WMA"
@@ -426,7 +424,11 @@ function(x, n=20, ...) {
 
   # Hull Moving Average
 
-  reclass(WMA(2*WMA(x, n=n/2, ...) - WMA(x, n=n, ...), n=trunc(sqrt(n)), ...), x)
+  madiff <- 2 * WMA(x, n = trunc(n / 2), ...) - WMA(x, n = n, ...)
+
+  hma <- WMA(madiff, n = trunc(sqrt(n)), ...)
+
+  reclass(hma, x)
 }
 
 #-------------------------------------------------------------------------#

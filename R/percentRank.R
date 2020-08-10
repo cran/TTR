@@ -41,7 +41,7 @@
 #'rank values that are not found within the lookback window.
 #'@author Charlie Friedemann
 #'@references The following site(s) were used to code/document this
-#'indicator:\cr \url{http://en.wikipedia.org/wiki/Percentile_rank}\cr
+#'indicator:\cr \url{https://en.wikipedia.org/wiki/Percentile_rank}\cr
 #'@keywords ts
 runPercentRank <- function(x, n=260, cumulative = FALSE, exact.multiplier = 0.5) {
   x <- try.xts(x, error = as.matrix)
@@ -56,7 +56,7 @@ runPercentRank <- function(x, n=260, cumulative = FALSE, exact.multiplier = 0.5)
     if (any(is.na(x[-(1:NAs)]))) stop("Series contains non-leading NAs")
   }
 
-  if (identical(as.integer(n), 1L)) {
+  if (!isTRUE(cumulative) && identical(as.integer(n), 1L)) {
     result <- double(NROW(x))
     result[] <- exact.multiplier
   } else {

@@ -6,8 +6,12 @@
 \alias{guppy}
 \title{Guppy Multiple Moving Averages}
 \usage{
-GMMA(x, short = c(3, 5, 8, 10, 12, 15), long = c(30, 35, 40, 45, 50, 60),
-  maType)
+GMMA(
+  x,
+  short = c(3, 5, 8, 10, 12, 15),
+  long = c(30, 35, 40, 45, 50, 60),
+  maType
+)
 }
 \arguments{
 \item{x}{Price, volume, etc. series that is coercible to xts or matrix.}
@@ -46,7 +50,7 @@ gmma <- GMMA(ttrc[,"Close"])
 \references{
 The following site(s) were used to code/document this
 indicator:\cr
-\url{http://www.investopedia.com/terms/g/guppy-multiple-moving-average.asp}\cr
+\url{https://www.investopedia.com/terms/g/guppy-multiple-moving-average.asp}\cr
 }
 \seealso{
 See \code{\link{aroon}}, \code{\link{CCI}}, \code{\link{ADX}},
