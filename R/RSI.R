@@ -58,10 +58,10 @@
 #'\url{https://www.fmlabs.com/reference/RSI.htm}\cr
 #'\url{https://www.metastock.com/Customer/Resources/TAAZ/?p=100}\cr
 #'\url{https://www.linnsoft.com/techind/relative-strength-index-rsi}\cr
-#'\url{https://www.stockcharts.com/school/doku.php?id=chart_school:technical_indicators:relative_strength_index_rsi}\cr
+#'\url{https://school.stockcharts.com/doku.php?id=technical_indicators:relative_strength_index_rsi}\cr
 #'\cr Stochastic RSI:\cr
 #'\url{https://www.fmlabs.com/reference/StochRSI.htm}\cr
-#'\url{https://www.stockcharts.com/school/doku.php?id=chart_school:technical_indicators:stochrsi}\cr
+#'\url{https://school.stockcharts.com/doku.php?id=technical_indicators:stochrsi}\cr
 #'@keywords ts
 #'@examples
 #'
@@ -75,8 +75,7 @@
 #' rsiMA1 <- RSI(price, n=14, maType="WMA", wts=ttrc[,"Volume"])
 #'
 #' # Case of two different 'maType's for both MAs
-#' rsiMA2 <- RSI(price, n=14, maType=list(maUp=list(EMA,ratio=1/5),
-#'              maDown=list(WMA,wts=1:10)))
+#' rsiMA2 <- RSI(price, n=14, maType=list(maUp=list(EMA),maDown=list(WMA)))
 #'
 #'
 "RSI" <- 
@@ -114,7 +113,7 @@ function(price, n=14, maType, ...) {
     # If MA function has 'n' arg, see if it's populated in maType;
     # if it isn't, populate it with RSI's formal 'n'
     for(i in 1:length(maType)) {
-      if( !is.null( formals(maType[[i]])$n ) && is.null( maType[[i]]$n ) ) {
+      if( !is.null( formals(maType[[i]][[1]])$n ) && is.null( maType[[i]]$n ) ) {
         maType[[i]]$n <- n
       }
       mavgUp <- do.call( maType[[1]][[1]], c( list(up), maType[[1]][-1] ) )
