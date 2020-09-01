@@ -1,5 +1,5 @@
-87458210c7273bbd45f3fce90f32d058 *CHANGES
-6e18ec9091aca0c231d6b574e5d6f9a0 *DESCRIPTION
+251c6b9fd98703cf21b4329635d464e2 *CHANGES
+9b5dde35d967baeac9b600792ff90b9a *DESCRIPTION
 2dbe901a590fb6476210b26647a83242 *NAMESPACE
 ebcdad6ac17a5f38c673536a6351c9e7 *R/ADX.R
 35f4b666c7c9f5c0ba45bc06838f8e72 *R/ATR.R
@@ -109,7 +109,7 @@ a66b577d78b3c39ebc1255c6a3eb9bd9 *man/ultimateOscillator.Rd
 5395f9c744f3a30dfe9d6dd894df0de9 *src/adjRatios.c
 4e0e9c5359bfc9df19bff66554b6c084 *src/aroon.c
 63f680421bd5b0373c1a501a260e7c59 *src/init.c
-dc6e12669f0526be2886dd79594bd543 *src/moving_averages.c
+9c895b64eb3431af8cf72c2c460c11f5 *src/moving_averages.c
 1c036b4eb9efecf5e703bcef2c43d367 *src/percent_rank.c
 2647dd6af7ea9ed834501aa6c0334f02 *src/runfun.c
 10a1303730f1347afd27796d865fefb9 *src/sar.c
