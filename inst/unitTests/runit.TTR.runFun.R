@@ -56,7 +56,6 @@ test.runMin <- function() {
 test.runMin.cumulative <- function() {
   ttr <- runMin(input$all$Close, 1, TRUE)
   base <- cummin(input$all$Close)
-  is.na(base) <- 1
   checkEqualsNumeric(base, ttr)
 }
 
@@ -75,7 +74,6 @@ test.runMax <- function() {
 test.runMax.cumulative <- function() {
   ttr <- runMax(input$all$Close, 1, TRUE)
   base <- cummax(input$all$Close)
-  is.na(base) <- 1
   checkEqualsNumeric(base, ttr)
 }
 
@@ -96,6 +94,11 @@ test.runMean.cumulative <- function() {
   base <- cumsum(input$all$Close) / seq_along(input$all$Close)
   is.na(base) <- 1:4
   checkEqualsNumeric(base, ttr)
+}
+test.runMean.cumulative.n.equals.1 <- function() {
+  n.1.cum <- runMean(1, n = 1, cumulative = TRUE)
+  n.1.noncum <- runMean(1, n = 1, cumulative = FALSE)
+  checkEqualsNumeric(n.1.cum, n.1.noncum)
 }
 
 
@@ -139,6 +142,11 @@ test.runMedian.cumulative.leading.NA <- function() {
   ymed <- runMedian(y, 1, "mean", TRUE)
   checkEqualsNumeric(ymed, c(na, xmed))
 }
+test.runMedian.cumulative.n.equals.1 <- function() {
+  n.1.cum <- runMedian(1, n = 1, cumulative = TRUE)
+  n.1.noncum <- runMedian(1, n = 1, cumulative = FALSE)
+  checkEqualsNumeric(n.1.cum, n.1.noncum)
+}
 
 # Covariance
 test.runCov <- function() {
@@ -157,6 +165,13 @@ test.runCov <- function() {
   # x and y arguments as xts objects
   checkEqualsNumeric( runCov(xts::as.xts(input$all)$High, xts::as.xts(input$all)$Low), output$allCov )
 }
+
+test.runCov.xts.nonleading.na <- function() {
+  top <- input$top$Close
+  mid <- input$mid$Close
+  checkException(runCov(top, mid))
+}
+
 test.runCov.cumulative <- function() {
   cumcov <- compiler::cmpfun(
     function(x) {

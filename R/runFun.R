@@ -79,7 +79,6 @@ function(x, n=10, cumulative=FALSE) {
       if( NAs + n > NROW(x) ) stop("not enough non-NA values")
     }
     beg <- 1 + NAs
-    len <- NROW(x) - NAs
 
     # Initialize result vector
     result <- double(NROW(x))
@@ -87,7 +86,7 @@ function(x, n=10, cumulative=FALSE) {
     result[beg:NROW(x)] <- cumsum(x[beg:NROW(x)])
 
     # Replace 1:(n-1) with NAs
-    is.na(result) <- c(1:(n-1+NAs))
+    is.na(result) <- seq_len(n-1+NAs)
   } else {
     # Call C routine
     result <- .Call("runsum", x, n, PACKAGE = "TTR")
@@ -120,7 +119,6 @@ function(x, n=10, cumulative=FALSE) {
       if( NAs + n > NROW(x) ) stop("not enough non-NA values")
     }
     beg <- 1 + NAs
-    len <- NROW(x) - NAs
 
     # Initialize result vector
     result <- double(NROW(x))
@@ -128,7 +126,7 @@ function(x, n=10, cumulative=FALSE) {
     result[beg:NROW(x)] <- cummin(x[beg:NROW(x)])
 
     # Replace 1:(n-1) with NAs
-    is.na(result) <- c(1:(n-1+NAs))
+    is.na(result) <- seq_len(n-1+NAs)
   } else {
     # Call C routine
     result <- .Call("runmin", x, n, PACKAGE = "TTR")
@@ -161,7 +159,6 @@ function(x, n=10, cumulative=FALSE) {
       if( NAs + n > NROW(x) ) stop("not enough non-NA values")
     }
     beg <- 1 + NAs
-    len <- NROW(x) - NAs
 
     if(NCOL(x) > 1) {
       stop("ncol(x) > 1. runMax only supports univariate 'x'")
@@ -173,7 +170,7 @@ function(x, n=10, cumulative=FALSE) {
     result[beg:NROW(x)] <- cummax(x[beg:NROW(x)])
 
     # Replace 1:(n-1) with NAs and prepend NAs from original data
-    is.na(result) <- c(1:(n-1+NAs))
+    is.na(result) <- seq_len(n-1+NAs)
   } else {
     # Call C routine
     result <- .Call("runmax", x, n, PACKAGE = "TTR")
@@ -249,7 +246,7 @@ function(x, y, n=10, use="all.obs", sample=TRUE, cumulative=FALSE) {
   # "all.obs", "complete.obs", "pairwise.complete.obs"
 
   # Call C routine
-  result <- .Call("runcov", x, y, n, sample, cumulative, PACKAGE = "TTR")
+  result <- .Call("runcov", xy[,1], xy[,2], n, sample, cumulative, PACKAGE = "TTR")
 
   # Convert back to original class
   # Should the attributes of *both* x and y be retained?
