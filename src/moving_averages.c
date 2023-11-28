@@ -39,8 +39,7 @@ SEXP ema (SEXP x, SEXP n, SEXP ratio, SEXP wilder) {
 
     if(R_NilValue == n || i_n <= 0) {
       if(R_NilValue == ratio || d_ratio <= 0.0) {
-        error("either 'n' or 'ratio' must be specified and > 0\n",
-              "'n' is ", n, " 'ratio' is ", ratio);
+        error("either 'n' or 'ratio' must be specified and > 0\n'n' is %d and 'ratio' is %1.6f", i_n, d_ratio);
       } else {
         /* If ratio is specified, and n is not, set n to approx 'correct'
          * value backed out from ratio */
@@ -122,89 +121,39 @@ SEXP evwma (SEXP pr, SEXP vo, SEXP n) {
     PROTECT(result = allocVector(REALSXP,nr)); P++;
     double *d_result = REAL(result);
 
-    /* Volume Sum */
-    double volSum = 0;
-
-    /* Find first non-NA input value */
-    int beg = i_n - 1;
-    for(i = 0; i <= beg; i++) {
-        /* Account for leading NAs in input */
-        if(ISNA(d_pr[i]) || ISNA(d_vo[i])) {
-            d_result[i] = NA_REAL;
-            beg++;
-            continue;
-        }
-        /* Set leading NAs in output */
-        if(i < beg) {
-            d_result[i] = NA_REAL;
-        /* First result value is first price value */
-        } else {
-            d_result[i] = d_pr[i];
-        }
-        /* Keep track of volume Sum */
-        volSum += d_vo[i];
+    /* check for non-leading NAs and get first non-NA location */
+    SEXP _first_pr = PROTECT(xts_na_check(pr, ScalarLogical(TRUE))); P++;
+    int first_pr = asInteger(_first_pr);
+    if(i_n + first_pr > nr) {
+      error("not enough non-NA values in 'price'");
+    }
+    SEXP _first_vo = PROTECT(xts_na_check(vo, ScalarLogical(TRUE))); P++;
+    int first_vo = asInteger(_first_vo);
+    if(i_n + first_vo > nr) {
+      error("not enough non-NA values in 'volume'");
     }
 
-    /* Loop over non-NA input values */
-    for(i = beg+1; i < nr; i++) {
+    int first = first_pr > first_vo ? first_pr : first_vo;
+    int begin = first + i_n - 1;
+
+    /* Set leading NAs in output */
+    for(i = 0; i < begin; i++) {
+      d_result[i] = NA_REAL;
+    }
+
+    /* First non-NA result is the first non-NA value of 'x' */
+    d_result[begin] = d_pr[begin];
+
+    /* Initialize volume sum */
+    double volSum = 0.0;
+    for(i = first; i < begin+1; i++) {
+      volSum += d_vo[i];
+    }
+
+    /* Loop over the rest of the values */
+    for(i = begin + 1; i < nr; i++) {
         volSum = volSum + d_vo[i] - d_vo[i-i_n];
         d_result[i] = ((volSum-d_vo[i])*d_result[i-1]+d_vo[i]*d_pr[i])/volSum;
-    }
-
-    /* UNPROTECT R objects and return result */
-    UNPROTECT(P);
-    return(result);
-}
-
-SEXP vma (SEXP x, SEXP w, SEXP ratio) {
-    
-    /* Initialize loop and PROTECT counters */
-    int i, P=0;
-
-    /* ensure that 'x' is double */
-    if(TYPEOF(x) != REALSXP) {
-      PROTECT(x = coerceVector(x, REALSXP)); P++;
-    }
-    /* ensure that 'w' is double */
-    if(TYPEOF(w) != REALSXP) {
-      PROTECT(w = coerceVector(w, REALSXP)); P++;
-    }
-
-    /* Pointers to function arguments */
-    double *d_x = REAL(x);
-    double *d_w = REAL(w);
-    double d_ratio = asReal(ratio);
-    
-    /* Input object length */
-    int nr = nrows(x);
-
-    /* Initialize result R object */
-    SEXP result;
-    PROTECT(result = allocVector(REALSXP,nr)); P++;
-    double *d_result = REAL(result);
-
-    /* Find first non-NA input value */
-    int beg = 0;
-    d_result[beg] = 0;
-    for(i = 0; i <= beg; i++) {
-        /* Account for leading NAs in input */
-        if(ISNA(d_x[i]) || ISNA(d_w[i])) {
-            d_result[i] = NA_REAL;
-            beg++;
-            d_result[beg] = 0;
-            continue;
-        }
-        /* Set leading NAs in output */
-        if(i < beg) {
-            d_result[i] = NA_REAL;
-        }
-        /* Raw mean to start VMA */
-        d_result[beg] += d_x[i];
-    }
-
-    /* Loop over non-NA input values */
-    for(i = beg+1; i < nr; i++) {
-        d_result[i] = d_x[i] * d_w[i] * d_ratio + d_result[i-1] * (1-d_ratio*d_w[i]);
     }
 
     /* UNPROTECT R objects and return result */
@@ -239,29 +188,30 @@ SEXP wma (SEXP x, SEXP w, SEXP n) {
     PROTECT(result = allocVector(REALSXP,nr)); P++;
     double *d_result = REAL(result);
 
-    /* Find first non-NA input value */
-    int beg = i_n - 1;
-    for(i = 0; i < beg; i++) {
-        /* Account for leading NAs in input */
-        if(ISNA(d_x[i])) {
-            d_result[i] = NA_REAL;
-            beg++;
-            continue;
-        }
-        /* Set leading NAs in output */
-        if(i < beg) {
-            d_result[i] = NA_REAL;
-        }
+    /* check for non-leading NAs and get first non-NA location */
+    SEXP _first = PROTECT(xts_na_check(x, ScalarLogical(TRUE))); P++;
+    int first = INTEGER(_first)[0];
+    if(i_n + first > nr) {
+      error("not enough non-NA values");
+    }
+
+    int begin = first + i_n - 1;
+    /* Set leading NAs in output */
+    for(i = 0; i < begin; i++) {
+      d_result[i] = NA_REAL;
     }
 
     /* Sum of weights (w does not have NA) */
     double wtsum = 0.0;
     for(j = 0; j < i_n; j++) {
+      if(ISNA(d_w[j])) {
+          error("wts cannot contain NA");
+      }
       wtsum += d_w[j];
     }
 
     /* Loop over non-NA input values */
-    for(i = beg; i < nr; i++) {
+    for(i = begin; i < nr; i++) {
       double num = 0.0;
       int ni = i - i_n + 1;
       for(j = 0; j < i_n; j++) {
@@ -295,8 +245,7 @@ SEXP zlema (SEXP x, SEXP n, SEXP ratio) {
 
     if(R_NilValue == n || i_n <= 0) {
       if(R_NilValue == ratio || d_ratio <= 0.0) {
-        error("either 'n' or 'ratio' must be specified and > 0\n",
-              "'n' is ", n, " 'ratio' is ", ratio);
+        error("either 'n' or 'ratio' must be specified and > 0\n'n' is %d and 'ratio' is %1.6f", i_n, d_ratio);
       } else {
         /* If ratio is specified, and n is not, set n to approx 'correct'
          * value backed out from ratio */

@@ -36,7 +36,6 @@ static const R_CallMethodDef CallEntries[] = {
   CALLDEF(sar,                  4),
   CALLDEF(ttr_rollPercentRank,  4),
   CALLDEF(ttr_zigzag,           6),
-  CALLDEF(vma,                  3),
   CALLDEF(wilderSum,            2),
   CALLDEF(wma,                  3),
   CALLDEF(zlema,                3),
@@ -54,7 +53,8 @@ void R_init_TTR(DllInfo *dll)
 {
   R_registerRoutines(dll, NULL, CallEntries, NULL, NULL);
   R_useDynamicSymbols(dll, FALSE);
-  //R_forceSymbols(dll, TRUE);  /* only use R symbols (not strings) */
+  R_forceSymbols(dll, TRUE);
 
+  /* imports from xts C code */
   xts_na_check = (SEXP(*)(SEXP,SEXP)) R_GetCCallable("xts", "naCheck");
 }

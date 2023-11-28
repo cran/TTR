@@ -33,22 +33,22 @@ lowest low are the same over the last \code{n} periods.
 }
 \examples{
 
-data(ttrc)
-stochOsc <- stoch(ttrc[,c("High","Low","Close")])
-stochWPR<- WPR(ttrc[,c("High","Low","Close")])
+ data(ttrc)
+ stochOsc <- stoch(ttrc[,c("High","Low","Close")])
+ stochWPR<- WPR(ttrc[,c("High","Low","Close")])
 
-plot(tail(stochOsc[,"fastK"], 100), type="l",
-    main="Fast \%K and Williams \%R", ylab="",
-    ylim=range(cbind(stochOsc, stochWPR), na.rm=TRUE) )
-lines(tail(stochWPR, 100), col="blue")
-lines(tail(1-stochWPR, 100), col="red", lty="dashed")
+ plot(tail(stochOsc[,"fastK"], 100), type="l",
+     main="Fast \%K and Williams \%R", ylab="",
+     ylim=range(cbind(stochOsc, stochWPR), na.rm=TRUE) )
+ lines(tail(stochWPR, 100), col="blue")
+ lines(tail(1-stochWPR, 100), col="red", lty="dashed")
 
 }
 \references{
 The following site(s) were used to code/document this
 indicator:\cr
 \url{https://www.fmlabs.com/reference/WilliamsR.htm}\cr
-\url{https://www.metastock.com/Customer/Resources/TAAZ/#126}\cr
+\url{https://www.metastock.com/Customer/Resources/TAAZ/?p=126}\cr
 \url{https://www.linnsoft.com/techind/williams-r-wpr}\cr
 \url{https://school.stockcharts.com/doku.php?id=technical_indicators:williams_r}\cr
 }

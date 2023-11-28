@@ -100,7 +100,13 @@ test.runMean.cumulative.n.equals.1 <- function() {
   n.1.noncum <- runMean(1, n = 1, cumulative = FALSE)
   checkEqualsNumeric(n.1.cum, n.1.noncum)
 }
+test.runMean.cumulative.accounts.for.leading.NA <- function() {
+  x <- c(rep(NA_real_, 5), 1:5)
+  target <- c(rep(NA_real_, 5), cumsum(1:5) / 1:5)
+  result <- runMean(x, n = 1, cumulative = TRUE)
 
+  checkEqualsNumeric(target, result)
+}
 
 # Median
 test.runMedian <- function() {
@@ -172,6 +178,13 @@ test.runCov.xts.nonleading.na <- function() {
   checkException(runCov(top, mid))
 }
 
+test.runCov.n.1.and.cumulative.FALSE.warns <- function() {
+  op <- options("warn")
+  options(warn = 2)
+  on.exit(options(warn = op$warn))
+  checkException(runCov(1:10, 1:10, n = 1, cumulative = FALSE))
+}
+
 test.runCov.cumulative <- function() {
   cumcov <- compiler::cmpfun(
     function(x) {
@@ -185,6 +198,11 @@ test.runCov.cumulative <- function() {
   )
   x <- input$all$Close
   base <- cumcov(x)
+
+  is.na(base) <- 1
+  ttr <- runCov(x, x, 1, "all.obs", TRUE, TRUE)
+  checkEqualsNumeric(base, ttr)
+
   is.na(base) <- 1:4
   ttr <- runCov(x, x, 5, "all.obs", TRUE, TRUE)
   checkEqualsNumeric(base, ttr)
@@ -233,6 +251,17 @@ test.runSD <- function() {
   checkException( runSD(input$all$Close, n = -1) )
   checkException( runSD(input$all$Close, n = NROW(input$all) + 1) )
   checkEqualsNumeric( tail(runSD(input$all$Close,250),1), sd(input$all$Close) )
+}
+
+test.runSD.cumulative.with.leading.NA <- function() {
+  x <- c(rep(NA_real_, 5), 1:5)
+
+  target <- sapply(1:5, function(i) sd(seq_len(i)))
+  target <- c(rep(NA, 5), target)
+
+  result <- runSD(x, n = 1, cumulative = TRUE)
+
+  checkEqualsNumeric(target, result)
 }
 
 # Absolute deviation

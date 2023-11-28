@@ -12,7 +12,6 @@
 \alias{ZLEMA}
 \alias{VWAP}
 \alias{VWMA}
-\alias{VMA}
 \alias{MA}
 \alias{HMA}
 \alias{ALMA}
@@ -32,8 +31,6 @@ ZLEMA(x, n = 10, ratio = NULL, ...)
 
 VWAP(price, volume, n = 10, ...)
 
-VMA(x, w, ratio = 1, ...)
-
 HMA(x, n = 20, ...)
 
 ALMA(x, n = 9, offset = 0.85, sigma = 6, ...)
@@ -50,7 +47,7 @@ ALMA(x, n = 9, offset = 0.85, sigma = 6, ...)
 calculated; see notes.}
 
 \item{ratio}{A smoothing/decay ratio.  \code{ratio} overrides \code{wilder}
-in \code{EMA}, and provides additional smoothing in \code{VMA}.}
+in \code{EMA}.}
 
 \item{v}{The 'volume factor' (a number in [0,1]).  See Notes.}
 
@@ -62,8 +59,6 @@ length of \code{x}, or \code{n} (the default).}
 \item{volume}{Volume series that is coercible to xts or matrix, that
 corresponds to price series, or a constant.  See Notes.}
 
-\item{w}{Vector of weights (in [0,1]) the same length as \code{x}.}
-
 \item{offset}{Percentile at which the center of the distribution should occur.}
 
 \item{sigma}{Standard deviation of the distribution.}
@@ -71,19 +66,19 @@ corresponds to price series, or a constant.  See Notes.}
 \value{
 A object of the same class as \code{x} or \code{price} or a vector
 (if \code{try.xts} fails) containing the columns:
-\describe{
-   \item{SMA}{ Simple moving average. }
-   \item{EMA}{ Exponential moving average. }
-   \item{WMA}{ Weighted moving average. }
-   \item{DEMA}{ Double-exponential moving average. }
-   \item{EVWMA}{ Elastic, volume-weighted moving average. }
-   \item{ZLEMA}{ Zero lag exponential moving average. }
-   \item{VWMA}{ Volume-weighed moving average (same as \code{VWAP}). }
-   \item{VWAP}{ Volume-weighed average price (same as \code{VWMA}). }
-   \item{VWA}{ Variable-length moving average. }
-   \item{HMA}{ Hull moving average. }
-   \item{ALMA}{ Arnaud Legoux moving average. }
-}
+ \describe{
+    \item{SMA}{ Simple moving average. }
+    \item{EMA}{ Exponential moving average. }
+    \item{WMA}{ Weighted moving average. }
+    \item{DEMA}{ Double-exponential moving average. }
+    \item{EVWMA}{ Elastic, volume-weighted moving average. }
+    \item{ZLEMA}{ Zero lag exponential moving average. }
+    \item{VWMA}{ Volume-weighed moving average (same as \code{VWAP}). }
+    \item{VWAP}{ Volume-weighed average price (same as \code{VWMA}). }
+    \item{VWA}{ Variable-length moving average. }
+    \item{HMA}{ Hull moving average. }
+    \item{ALMA}{ Arnaud Legoux moving average. }
+ }
 }
 \description{
 Calculate various moving averages (MA) of a series.
@@ -111,10 +106,6 @@ observations, but attempts to remove lag by subtracting data prior to
 
 \code{VWMA} and \code{VWAP} calculate the volume-weighted moving average
 price.
-
-\code{VMA} calculate a variable-length moving average based on the absolute
-value of \code{w}.  Higher (lower) values of \code{w} will cause \code{VMA}
-to react faster (slower).
 
 \code{HMA} a WMA of the difference of two other WMAs, making it very
 reponsive.
@@ -156,28 +147,28 @@ becomes more stable.  See example below.
 
 \examples{
 
-data(ttrc)
-ema.20 <-   EMA(ttrc[,"Close"], 20)
-sma.20 <-   SMA(ttrc[,"Close"], 20)
-dema.20 <-  DEMA(ttrc[,"Close"], 20)
-evwma.20 <- EVWMA(ttrc[,"Close"], ttrc[,"Volume"], 20)
-zlema.20 <- ZLEMA(ttrc[,"Close"], 20)
-alma <- ALMA(ttrc[,"Close"])
-hma <- HMA(ttrc[,"Close"])
+ data(ttrc)
+ ema.20 <-   EMA(ttrc[,"Close"], 20)
+ sma.20 <-   SMA(ttrc[,"Close"], 20)
+ dema.20 <-  DEMA(ttrc[,"Close"], 20)
+ evwma.20 <- EVWMA(ttrc[,"Close"], ttrc[,"Volume"], 20)
+ zlema.20 <- ZLEMA(ttrc[,"Close"], 20)
+ alma <- ALMA(ttrc[,"Close"])
+ hma <- HMA(ttrc[,"Close"])
 
-## Example of Tim Tillson's T3 indicator
-T3 <- function(x, n=10, v=1) DEMA(DEMA(DEMA(x,n,v),n,v),n,v)
-t3 <- T3(ttrc[,"Close"])
+ ## Example of Tim Tillson's T3 indicator
+ T3 <- function(x, n=10, v=1) DEMA(DEMA(DEMA(x,n,v),n,v),n,v)
+ t3 <- T3(ttrc[,"Close"])
 
-## Example of short-term instability of EMA
-## (and other indicators mentioned above)
-x <- rnorm(100)
-tail( EMA(x[90:100],10), 1 )
-tail( EMA(x[70:100],10), 1 )
-tail( EMA(x[50:100],10), 1 )
-tail( EMA(x[30:100],10), 1 )
-tail( EMA(x[10:100],10), 1 )
-tail( EMA(x[ 1:100],10), 1 )
+ ## Example of short-term instability of EMA
+ ## (and other indicators mentioned above)
+ x <- rnorm(100)
+ tail( EMA(x[90:100],10), 1 )
+ tail( EMA(x[70:100],10), 1 )
+ tail( EMA(x[50:100],10), 1 )
+ tail( EMA(x[30:100],10), 1 )
+ tail( EMA(x[10:100],10), 1 )
+ tail( EMA(x[ 1:100],10), 1 )
 
 }
 \references{

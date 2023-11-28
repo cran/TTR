@@ -432,45 +432,72 @@ SEXP runcov(SEXP _x, SEXP _y, SEXP _n, SEXP _sample, SEXP _cumulative)
     error("not enough non-NA values in 'y'");
   }
   int first = (first_x > first_y) ? first_x : first_y;
+  int first_i = first + n - 1;
 
   /* Set leading NAs in output */
-  for (i = 0; i < first + n; i++) {
+  for (i = 0; i < first_i; i++) {
     result[i] = NA_REAL;
   }
 
   SEXP _window;
   double *window, mu_x, mu_y;
-  int first_i = first + n - 1;
-  double denom = sample ? (n-1) : n;
 
   if (cumulative) {
-    for (i = first_i; i < nr; i++) {
-      mu_x = ttr_mean(x, i+1);
-      mu_y = ttr_mean(y, i+1);
+    double sum_x = 0.0;
+    double sum_y = 0.0;
 
-      result[i] = 0.0;
-      for (j = 0; j <= i; j++) {
-        result[i] += (x[i-j] - mu_x) * (y[i-j] - mu_y);
-      }
-      result[i] /= sample ? i : (i+1);
+    // Initialize means
+    for (i = first; i < first_i; i++) {
+      sum_x += x[i];
+      sum_y += y[i];
     }
-  } else {
-    _window = PROTECT(allocVector(REALSXP, n)); P++;
-    window = REAL(_window);
-
-    size_t window_size = n * sizeof(double);
+    mu_x = sum_x / (first+1);
+    mu_y = sum_y / (first+1);
 
     for (i = first_i; i < nr; i++) {
-      memcpy(window, &x[i-n+1], window_size);
-      mu_x = ttr_mean(window, n);
-      memcpy(window, &y[i-n+1], window_size);
-      mu_y = ttr_mean(window, n);
+      double n_window = (double)(i-first_i+n);
+
+      sum_x += x[i];
+      sum_y += y[i];
+
+      mu_x = sum_x / n_window;
+      mu_y = sum_y / n_window;
 
       result[i] = 0.0;
-      for (j = 0; j < n; j++) {
-        result[i] += (x[i-j] - mu_x) * (y[i-j] - mu_y);
+      for (j = first; j <= i; j++) {
+        result[i] += (x[j] - mu_x) * (y[j] - mu_y);
       }
-      result[i] /= denom;
+      result[i] /= sample ? (n_window-1.0) : n_window;
+    }
+    /* Set first non-NA element to NA to match var() and sd()
+     * because var/sd of 1 observation is not defined */
+    result[first] = NA_REAL;
+  } else {
+    double denom = sample ? (n-1) : n;
+
+    if (n == 1) {
+      warning("(co-)variance is not defined for one observation; returning NA");
+      for (i = first_i; i < nr; i++) {
+        result[i] = NA_REAL;
+      }
+    } else {
+      _window = PROTECT(allocVector(REALSXP, n)); P++;
+      window = REAL(_window);
+
+      size_t window_size = n * sizeof(double);
+
+      for (i = first_i; i < nr; i++) {
+        memcpy(window, &x[i-n+1], window_size);
+        mu_x = ttr_mean(window, n);
+        memcpy(window, &y[i-n+1], window_size);
+        mu_y = ttr_mean(window, n);
+
+        result[i] = 0.0;
+        for (j = 0; j < n; j++) {
+          result[i] += (x[i-j] - mu_x) * (y[i-j] - mu_y);
+        }
+        result[i] /= denom;
+      }
     }
   }
 
